@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PatriSystem.DataAccess.Context;
 
@@ -11,9 +12,11 @@ using PatriSystem.DataAccess.Context;
 namespace PatriSystem.DataAccess.Migrations
 {
     [DbContext(typeof(PatriSystemDbContext))]
-    partial class PatriSystemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260517205031_AddBarcodeToProduct")]
+    partial class AddBarcodeToProduct
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

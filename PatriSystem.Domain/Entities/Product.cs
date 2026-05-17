@@ -3,6 +3,7 @@
     public class Product : AuditBase
     {
         public string ProductName { get; set; } = string.Empty;
+        public string? Barcode { get; set; }
         public string ProductDescription { get; set; } = string.Empty;
         public decimal UnitPrice { get; set; }
         public int CurrentStock { get; set; }

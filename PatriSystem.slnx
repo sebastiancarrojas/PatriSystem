@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="PatriSystem.API/PatriSystem.API.csproj" />
+  <Project Path="PatriSystem.DataAccess/PatriSystem.DataAccess.csproj" />
+  <Project Path="PatriSystem.Domain/PatriSystem.Domain.csproj" />
+</Solution>

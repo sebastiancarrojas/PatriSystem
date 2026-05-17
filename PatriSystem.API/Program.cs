@@ -1,11 +1,24 @@
 using Microsoft.EntityFrameworkCore;
 using PatriSystem.DataAccess.Context;
+using PatriSystem.DataAccess.Repositories;
+using PatriSystem.Domain.Interfaces.Repositories;
+using PatriSystem.Domain.Interfaces.Services;
+using PatriSystem.Domain.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Database
 builder.Services.AddDbContext<PatriSystemDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Repositories
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+
+// Services
+builder.Services.AddScoped<IProductService, ProductService>();
+
+// AutoMapper
+builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -13,7 +26,6 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

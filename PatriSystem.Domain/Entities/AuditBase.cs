@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace PatriSystem.Domain.Entities
+﻿namespace PatriSystem.Domain.Entities
 {
-    internal class AuditBase
+    public abstract class AuditBase
     {
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime? UpdatedAt { get; set; }
     }
 }

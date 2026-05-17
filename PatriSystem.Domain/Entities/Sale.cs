@@ -1,10 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace PatriSystem.Domain.Entities
+﻿namespace PatriSystem.Domain.Entities
 {
-    internal class Sale
+    public class Sale : AuditBase
     {
+        public DateTime SaleDate { get; set; } = DateTime.UtcNow;
+        public decimal TotalAmount { get; set; }
+        public string SaleType { get; set; } = string.Empty;
+
+        // Navigation Properties
+        public ICollection<SaleDetail> SaleDetails { get; set; } = new List<SaleDetail>();
     }
 }

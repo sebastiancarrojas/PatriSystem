@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace PatriSystem.Domain.Entities
+﻿namespace PatriSystem.Domain.Entities
 {
-    internal class Category
+    public class Category : AuditBase
     {
+        public string CategoryName { get; set; } = string.Empty;
+
+        // Navigation Properties
+        public ICollection<Product> Products { get; set; } = new List<Product>();
     }
 }

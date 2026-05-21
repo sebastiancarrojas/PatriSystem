@@ -13,9 +13,13 @@ builder.Services.AddDbContext<PatriSystemDbContext>(options =>
 
 // Repositories
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IBrandRepository, BrandRepository>();
 
 // Services
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IBrandService, BrandService>();
 
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));

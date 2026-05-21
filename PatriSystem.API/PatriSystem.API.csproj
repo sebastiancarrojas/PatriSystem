@@ -21,8 +21,4 @@
     <ProjectReference Include="..\PatriSystem.DataAccess\PatriSystem.DataAccess.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="DTOs\Response\" />
-  </ItemGroup>
-
 </Project>

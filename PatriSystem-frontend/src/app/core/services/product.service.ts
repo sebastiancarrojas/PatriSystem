@@ -1,0 +1,30 @@
+import { Injectable, inject } from '@angular/core';
+import { Observable } from 'rxjs';
+import { ApiService } from './api.service';
+import { ApiResponse } from '../models/api-response.model';
+import { Product, CreateProductRequest, UpdateProductRequest } from '../models/product.model';
+
+@Injectable({ providedIn: 'root' })
+export class ProductService {
+  private api = inject(ApiService);
+
+  getAll(): Observable<Product[]> {
+    return this.api.get<Product[]>('Products');
+  }
+
+  getById(id: string): Observable<Product> {
+    return this.api.get<Product>(`Products/${id}`);
+  }
+
+  create(product: CreateProductRequest): Observable<ApiResponse<object>> {
+    return this.api.post<ApiResponse<object>>('Products', product);
+  }
+
+  update(id: string, product: UpdateProductRequest): Observable<ApiResponse<object>> {
+    return this.api.put<ApiResponse<object>>(`Products/${id}`, product);
+  }
+
+  deactivate(id: string): Observable<ApiResponse<object>> {
+    return this.api.delete<ApiResponse<object>>(`Products/${id}/deactivate`);
+  }
+}

@@ -28,6 +28,20 @@ export const routes: Routes = [
     ]
   },
   {
+    path: 'categories',
+    loadComponent: () =>
+      import('./features/categories/category-list/category-list').then(
+        (m) => m.CategoryListComponent
+      )
+  },
+  {
+    path: 'brands',
+    loadComponent: () =>
+      import('./features/brands/brand-list/brand-list').then(
+        (m) => m.BrandListComponent
+      )
+  },
+  {
     path: '',
     redirectTo: 'products',
     pathMatch: 'full'

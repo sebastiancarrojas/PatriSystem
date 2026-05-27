@@ -1,4 +1,5 @@
 ﻿using PatriSystem.Domain.Entities;
+using PatriSystem.Domain.Pagination;
 
 namespace PatriSystem.Domain.Interfaces.Repositories
 {
@@ -10,5 +11,6 @@ namespace PatriSystem.Domain.Interfaces.Repositories
         Task<List<Product>> GetAllAsync();
         Task UpdateAsync(Product product);
         Task DeactivateAsync(Guid id);
+        Task<PaginationResponse<Product>> GetPaginatedAsync(ProductPaginationRequest request);
     }
 }

@@ -1,0 +1,61 @@
+<div class="container">
+  <div class="header">
+    <h2>Marcas</h2>
+    <button mat-raised-button color="primary" (click)="showForm.set(!showForm())">
+      <mat-icon>{{ showForm() ? 'close' : 'add' }}</mat-icon>
+      {{ showForm() ? 'Cancelar' : 'Nueva Marca' }}
+    </button>
+  </div>
+
+  @if (showForm()) {
+    <form [formGroup]="form" (ngSubmit)="submit()" class="form-inline">
+      <mat-form-field appearance="outline">
+        <mat-label>Nombre de la marca</mat-label>
+        <input matInput formControlName="brandName" />
+        @if (form.get('brandName')?.hasError('required')) {
+          <mat-error>El nombre es requerido</mat-error>
+        }
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Descripción</mat-label>
+        <input matInput formControlName="brandDescription" />
+      </mat-form-field>
+      <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
+        Guardar
+      </button>
+    </form>
+  }
+
+  @if (loading()) {
+    <div class="spinner-container">
+      <mat-spinner></mat-spinner>
+    </div>
+  } @else {
+    <table mat-table [dataSource]="brands()" class="mat-elevation-z2">
+      <ng-container matColumnDef="brandName">
+        <th mat-header-cell *matHeaderCellDef>Nombre</th>
+        <td mat-cell *matCellDef="let brand">{{ brand.brandName }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="brandDescription">
+        <th mat-header-cell *matHeaderCellDef>Descripción</th>
+        <td mat-cell *matCellDef="let brand">{{ brand.brandDescription ?? '-' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="createdAt">
+        <th mat-header-cell *matHeaderCellDef>Fecha de creación</th>
+        <td mat-cell *matCellDef="let brand">{{ brand.createdAt | date:'dd/MM/yyyy' }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    @if (brands().length === 0) {
+      <div class="empty-state">
+        <mat-icon>branding_watermark</mat-icon>
+        <p>No hay marcas registradas</p>
+      </div>
+    }
+  }
+</div>

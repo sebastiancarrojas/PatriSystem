@@ -1,0 +1,52 @@
+<div class="container">
+  <div class="header">
+    <h2>Categorías</h2>
+    <button mat-raised-button color="primary" (click)="showForm.set(!showForm())">
+      <mat-icon>{{ showForm() ? 'close' : 'add' }}</mat-icon>
+      {{ showForm() ? 'Cancelar' : 'Nueva Categoría' }}
+    </button>
+  </div>
+
+  @if (showForm()) {
+    <form [formGroup]="form" (ngSubmit)="submit()" class="form-inline">
+      <mat-form-field appearance="outline">
+        <mat-label>Nombre de la categoría</mat-label>
+        <input matInput formControlName="categoryName" />
+        @if (form.get('categoryName')?.hasError('required')) {
+          <mat-error>El nombre es requerido</mat-error>
+        }
+      </mat-form-field>
+      <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
+        Guardar
+      </button>
+    </form>
+  }
+
+  @if (loading()) {
+    <div class="spinner-container">
+      <mat-spinner></mat-spinner>
+    </div>
+  } @else {
+    <table mat-table [dataSource]="categories()" class="mat-elevation-z2">
+      <ng-container matColumnDef="categoryName">
+        <th mat-header-cell *matHeaderCellDef>Nombre</th>
+        <td mat-cell *matCellDef="let category">{{ category.categoryName }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="createdAt">
+        <th mat-header-cell *matHeaderCellDef>Fecha de creación</th>
+        <td mat-cell *matCellDef="let category">{{ category.createdAt | date:'dd/MM/yyyy' }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    @if (categories().length === 0) {
+      <div class="empty-state">
+        <mat-icon>category</mat-icon>
+        <p>No hay categorías registradas</p>
+      </div>
+    }
+  }
+</div>

@@ -42,6 +42,25 @@ export const routes: Routes = [
       )
   },
   {
+    path: 'sales',
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/sales/sale-list/sale-list').then(
+            (m) => m.SaleListComponent
+          )
+      },
+      {
+        path: 'create',
+        loadComponent: () =>
+          import('./features/sales/sale-form/sale-form').then(
+            (m) => m.SaleFormComponent
+          )
+      }
+    ]
+  },
+  {
     path: '',
     redirectTo: 'products',
     pathMatch: 'full'

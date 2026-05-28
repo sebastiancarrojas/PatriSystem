@@ -2,18 +2,22 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { ProductService } from '../../../core/services/product.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { CategoryService } from '../../../core/services/category.service';
 import { BrandService } from '../../../core/services/brand.service';
 import { Category } from '../../../core/models/category.model';
 import { Brand } from '../../../core/models/brand.model';
+import { CategoryDialogComponent } from '../../../shared/components/category-dialog/category-dialog';
+import { BrandDialogComponent } from '../../../shared/components/brand-dialog/brand-dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialogModule } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-product-form',
@@ -27,7 +31,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatDialogModule
   ],
   templateUrl: './product-form.html',
   styleUrl: './product-form.scss'
@@ -40,6 +45,7 @@ export class ProductFormComponent implements OnInit {
   private categoryService = inject(CategoryService);
   private brandService = inject(BrandService);
   private notification = inject(NotificationService);
+  private dialog = inject(MatDialog);
 
   categories = signal<Category[]>([]);
   brands = signal<Brand[]>([]);
@@ -94,6 +100,26 @@ export class ProductFormComponent implements OnInit {
         this.notification.error('Error al cargar el producto');
         this.loading.set(false);
       }
+    });
+  }
+
+  openCategoryDialog(): void {
+    const dialogRef = this.dialog.open(CategoryDialogComponent, {
+      width: '400px'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) this.loadCategories();
+    });
+  }
+
+  openBrandDialog(): void {
+    const dialogRef = this.dialog.open(BrandDialogComponent, {
+      width: '400px'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) this.loadBrands();
     });
   }
 

@@ -1,0 +1,13 @@
+.paginator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 16px 0;
+}
+
+button.active {
+  background-color: var(--mat-sys-primary);
+  color: white;
+  border-radius: 4px;
+}

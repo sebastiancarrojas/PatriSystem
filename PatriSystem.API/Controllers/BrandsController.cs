@@ -30,7 +30,6 @@ namespace PatriSystem.API.Controllers
             var dto = _mapper.Map<List<BrandResponseDto>>(response.Result);
             return Ok(dto);
         }
-
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateBrandRequestDto dto)
         {
@@ -43,7 +42,8 @@ namespace PatriSystem.API.Controllers
             if (!response.IsSuccess)
                 return BadRequest(response);
 
-            return Ok(response);
+            var responseDto = _mapper.Map<BrandResponseDto>(response.Result);
+            return Ok(responseDto);
         }
     }
 }

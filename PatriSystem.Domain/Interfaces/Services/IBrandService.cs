@@ -5,7 +5,7 @@ namespace PatriSystem.Domain.Interfaces.Services
 {
     public interface IBrandService
     {
-        Task<Response<object>> CreateAsync(Brand brand);
+        Task<Response<Brand>> CreateAsync(Brand brand);
         Task<Response<List<Brand>>> GetAllAsync();
     }
 }

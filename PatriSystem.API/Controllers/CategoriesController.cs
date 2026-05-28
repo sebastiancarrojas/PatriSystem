@@ -30,7 +30,6 @@ namespace PatriSystem.API.Controllers
             var dto = _mapper.Map<List<CategoryResponseDto>>(response.Result);
             return Ok(dto);
         }
-
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateCategoryRequestDto dto)
         {
@@ -43,7 +42,8 @@ namespace PatriSystem.API.Controllers
             if (!response.IsSuccess)
                 return BadRequest(response);
 
-            return Ok(response);
+            var responseDto = _mapper.Map<CategoryResponseDto>(response.Result);
+            return Ok(responseDto);
         }
     }
 }

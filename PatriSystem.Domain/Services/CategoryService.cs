@@ -14,20 +14,22 @@ namespace PatriSystem.Domain.Services
             _categoryRepository = categoryRepository;
         }
 
-        public async Task<Response<object>> CreateAsync(Category category)
+        public async Task<Response<Category>> CreateAsync(Category category)
         {
             try
             {
                 var exists = await _categoryRepository.ExistsWithNameAsync(category.CategoryName);
                 if (exists)
-                    return Response<object>.Failure("Ya existe una categoría con ese nombre");
+                    return Response<Category>.Failure("Ya existe una categoría con ese nombre");
 
                 await _categoryRepository.CreateAsync(category);
-                return Response<object>.Success("Categoría creada correctamente");
+
+                var created = await _categoryRepository.GetByNameAsync(category.CategoryName);
+                return Response<Category>.Success(created!, "Categoría creada correctamente");
             }
             catch (Exception ex)
             {
-                return Response<object>.Failure(ex, "Error al crear la categoría");
+                return Response<Category>.Failure(ex, "Error al crear la categoría");
             }
         }
 

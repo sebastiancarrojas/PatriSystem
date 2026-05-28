@@ -32,6 +32,16 @@ mat-form-field {
   width: 100%;
 }
 
+.field-with-action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  mat-form-field {
+    flex: 1;
+  }
+}
+
 .actions {
   display: flex;
   justify-content: flex-end;

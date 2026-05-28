@@ -4,8 +4,12 @@ import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { ProductService } from '../../../core/services/product.service';
+import { CategoryService } from '../../../core/services/category.service';
+import { BrandService } from '../../../core/services/brand.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { Product } from '../../../core/models/product.model';
+import { Category } from '../../../core/models/category.model';
+import { Brand } from '../../../core/models/brand.model';
 import { ProductPaginationRequest } from '../../../core/models/pagination.model';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,6 +17,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { PaginatorComponent } from '../../../shared/components/paginator/paginator';
 
 @Component({
@@ -28,6 +33,7 @@ import { PaginatorComponent } from '../../../shared/components/paginator/paginat
     MatProgressSpinnerModule,
     MatFormFieldModule,
     MatInputModule,
+    MatSelectModule,
     PaginatorComponent
   ],
   templateUrl: './product-list.html',
@@ -35,9 +41,13 @@ import { PaginatorComponent } from '../../../shared/components/paginator/paginat
 })
 export class ProductListComponent implements OnInit {
   private productService = inject(ProductService);
+  private categoryService = inject(CategoryService);
+  private brandService = inject(BrandService);
   private notification = inject(NotificationService);
 
   products = signal<Product[]>([]);
+  categories = signal<Category[]>([]);
+  brands = signal<Brand[]>([]);
   loading = signal(false);
   totalCount = signal(0);
   currentPage = signal(1);
@@ -45,6 +55,9 @@ export class ProductListComponent implements OnInit {
   displayedColumns: string[] = ['productName', 'barcode', 'categoryName', 'brandName', 'unitPrice', 'status', 'actions'];
 
   searchControl = new FormControl('');
+  categoryControl = new FormControl('');
+  brandControl = new FormControl('');
+  statusControl = new FormControl('');
 
   request: ProductPaginationRequest = {
     page: 1,
@@ -53,12 +66,32 @@ export class ProductListComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadProducts();
+    this.loadCategories();
+    this.loadBrands();
 
     this.searchControl.valueChanges.pipe(
       debounceTime(400),
       distinctUntilChanged()
     ).subscribe(value => {
       this.request.filter = value ?? undefined;
+      this.request.page = 1;
+      this.loadProducts();
+    });
+
+    this.categoryControl.valueChanges.subscribe(value => {
+      this.request.categoryId = value ?? undefined;
+      this.request.page = 1;
+      this.loadProducts();
+    });
+
+    this.brandControl.valueChanges.subscribe(value => {
+      this.request.brandId = value ?? undefined;
+      this.request.page = 1;
+      this.loadProducts();
+    });
+
+    this.statusControl.valueChanges.subscribe(value => {
+      this.request.status = value === '' ? undefined : value === 'true';
       this.request.page = 1;
       this.loadProducts();
     });
@@ -81,8 +114,31 @@ export class ProductListComponent implements OnInit {
     });
   }
 
+  loadCategories(): void {
+    this.categoryService.getAll().subscribe({
+      next: (categories) => this.categories.set(categories),
+      error: () => this.notification.error('Error al cargar las categorías')
+    });
+  }
+
+  loadBrands(): void {
+    this.brandService.getAll().subscribe({
+      next: (brands) => this.brands.set(brands),
+      error: () => this.notification.error('Error al cargar las marcas')
+    });
+  }
+
   onPageChange(page: number): void {
     this.request.page = page;
+    this.loadProducts();
+  }
+
+  clearFilters(): void {
+    this.searchControl.setValue('');
+    this.categoryControl.setValue('');
+    this.brandControl.setValue('');
+    this.statusControl.setValue('');
+    this.request = { page: 1, recordsPerPage: 10 };
     this.loadProducts();
   }
 

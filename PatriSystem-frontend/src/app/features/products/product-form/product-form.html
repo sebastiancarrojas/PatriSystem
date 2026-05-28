@@ -30,29 +30,39 @@
         <textarea matInput formControlName="productDescription" rows="3"></textarea>
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Categoría</mat-label>
-        <mat-select formControlName="categoryId">
-          @for (category of categories(); track category.id) {
-            <mat-option [value]="category.id">{{ category.categoryName }}</mat-option>
+      <div class="field-with-action">
+        <mat-form-field appearance="outline">
+          <mat-label>Categoría</mat-label>
+          <mat-select formControlName="categoryId">
+            @for (category of categories(); track category.id) {
+              <mat-option [value]="category.id">{{ category.categoryName }}</mat-option>
+            }
+          </mat-select>
+          @if (form.get('categoryId')?.hasError('required')) {
+            <mat-error>La categoría es requerida</mat-error>
           }
-        </mat-select>
-        @if (form.get('categoryId')?.hasError('required')) {
-          <mat-error>La categoría es requerida</mat-error>
-        }
-      </mat-form-field>
+        </mat-form-field>
+        <button mat-icon-button color="primary" type="button" (click)="openCategoryDialog()">
+          <mat-icon>add_circle</mat-icon>
+        </button>
+      </div>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Marca</mat-label>
-        <mat-select formControlName="brandId">
-          @for (brand of brands(); track brand.id) {
-            <mat-option [value]="brand.id">{{ brand.brandName }}</mat-option>
+      <div class="field-with-action">
+        <mat-form-field appearance="outline">
+          <mat-label>Marca</mat-label>
+          <mat-select formControlName="brandId">
+            @for (brand of brands(); track brand.id) {
+              <mat-option [value]="brand.id">{{ brand.brandName }}</mat-option>
+            }
+          </mat-select>
+          @if (form.get('brandId')?.hasError('required')) {
+            <mat-error>La marca es requerida</mat-error>
           }
-        </mat-select>
-        @if (form.get('brandId')?.hasError('required')) {
-          <mat-error>La marca es requerida</mat-error>
-        }
-      </mat-form-field>
+        </mat-form-field>
+        <button mat-icon-button color="primary" type="button" (click)="openBrandDialog()">
+          <mat-icon>add_circle</mat-icon>
+        </button>
+      </div>
 
       <mat-form-field appearance="outline">
         <mat-label>Precio</mat-label>

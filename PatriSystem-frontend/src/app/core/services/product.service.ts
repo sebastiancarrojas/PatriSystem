@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
 import { ApiResponse } from '../models/api-response.model';
 import { Product, CreateProductRequest, UpdateProductRequest } from '../models/product.model';
+import { PaginationResponse, ProductPaginationRequest } from '../models/pagination.model';
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
@@ -10,6 +11,10 @@ export class ProductService {
 
   getAll(): Observable<Product[]> {
     return this.api.get<Product[]>('Products');
+  }
+
+  getPaginated(request: ProductPaginationRequest): Observable<PaginationResponse<Product>> {
+    return this.api.get<PaginationResponse<Product>>('Products/paginated', request as Record<string, any>);
   }
 
   getById(id: string): Observable<Product> {

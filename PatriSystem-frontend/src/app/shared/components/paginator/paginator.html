@@ -1,0 +1,17 @@
+<div class="paginator">
+  <button mat-icon-button [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+    <mat-icon>chevron_left</mat-icon>
+  </button>
+
+  @for (page of pages; track page) {
+    <button mat-button
+      [class.active]="page === currentPage"
+      (click)="goToPage(page)">
+      {{ page }}
+    </button>
+  }
+
+  <button mat-icon-button [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
+    <mat-icon>chevron_right</mat-icon>
+  </button>
+</div>

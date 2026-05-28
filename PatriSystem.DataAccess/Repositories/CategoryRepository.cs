@@ -30,5 +30,11 @@ namespace PatriSystem.DataAccess.Repositories
             return await _context.Categories
                 .AnyAsync(c => c.CategoryName.ToLower() == name.ToLower());
         }
+
+        public async Task<Category?> GetByNameAsync(string name)
+        {
+            return await _context.Categories
+                .FirstOrDefaultAsync(c => c.CategoryName.ToLower() == name.ToLower());
+        }
     }
 }

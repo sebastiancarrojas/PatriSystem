@@ -14,20 +14,22 @@ namespace PatriSystem.Domain.Services
             _brandRepository = brandRepository;
         }
 
-        public async Task<Response<object>> CreateAsync(Brand brand)
+        public async Task<Response<Brand>> CreateAsync(Brand brand)
         {
             try
             {
                 var exists = await _brandRepository.ExistsWithNameAsync(brand.BrandName);
                 if (exists)
-                    return Response<object>.Failure("Ya existe una marca con ese nombre");
+                    return Response<Brand>.Failure("Ya existe una marca con ese nombre");
 
                 await _brandRepository.CreateAsync(brand);
-                return Response<object>.Success("Marca creada correctamente");
+
+                var created = await _brandRepository.GetByNameAsync(brand.BrandName);
+                return Response<Brand>.Success(created!, "Marca creada correctamente");
             }
             catch (Exception ex)
             {
-                return Response<object>.Failure(ex, "Error al crear la marca");
+                return Response<Brand>.Failure(ex, "Error al crear la marca");
             }
         }
 

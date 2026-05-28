@@ -7,5 +7,6 @@ namespace PatriSystem.Domain.Interfaces.Repositories
         Task<List<Brand>> GetAllAsync();
         Task CreateAsync(Brand brand);
         Task<bool> ExistsWithNameAsync(string name);
+        Task<Brand?> GetByNameAsync(string name);
     }
 }

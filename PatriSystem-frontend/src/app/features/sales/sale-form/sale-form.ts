@@ -1,18 +1,19 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormControl, Validators } from '@angular/forms';
+import { debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
 import { SaleService } from '../../../core/services/sale.service';
 import { ProductService } from '../../../core/services/product.service';
 import { NotificationService } from '../../../core/services/notification.service';
-import { Product } from '../../../core/models/product.model';
+import { ProductSearch } from '../../../core/models/product.model';
 import { CreateSaleDetailRequest } from '../../../core/models/sale.model';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
@@ -27,70 +28,90 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatIconModule,
     MatFormFieldModule,
     MatInputModule,
-    MatSelectModule,
+    MatAutocompleteModule,
     MatProgressSpinnerModule
   ],
   templateUrl: './sale-form.html',
   styleUrl: './sale-form.scss'
 })
-export class SaleFormComponent implements OnInit {
+export class SaleFormComponent {
   private saleService = inject(SaleService);
   private productService = inject(ProductService);
   private notification = inject(NotificationService);
   private router = inject(Router);
   private fb = inject(FormBuilder);
 
-  products = signal<Product[]>([]);
+  searchResults = signal<ProductSearch[]>([]);
   details = signal<(CreateSaleDetailRequest & { productName: string; unitPrice: number; subTotal: number })[]>([]);
   loading = signal(false);
   displayedColumns: string[] = ['productName', 'quantity', 'unitPrice', 'subTotal', 'actions'];
 
-  form = this.fb.group({
-    productId: ['', Validators.required],
-    quantity: [1, [Validators.required, Validators.min(1)]]
-  });
+  searchControl = new FormControl('');
+  quantityControl = new FormControl(1, [Validators.required, Validators.min(1)]);
+
+  selectedProduct = signal<ProductSearch | null>(null);
 
   get total(): number {
     return this.details().reduce((acc, d) => acc + d.subTotal, 0);
   }
 
-  ngOnInit(): void {
-    this.loadProducts();
+  constructor() {
+    this.searchControl.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(term => {
+        if (!term || term.length < 2) return of([]);
+        return this.productService.searchForSale(term);
+      })
+    ).subscribe(results => this.searchResults.set(results));
   }
 
-  loadProducts(): void {
-    this.productService.getAll().subscribe({
-      next: (products) => this.products.set(products.filter(p => p.status)),
-      error: () => this.notification.error('Error al cargar los productos')
-    });
+  onProductSelected(product: ProductSearch): void {
+    this.selectedProduct.set(product);
+    this.searchControl.setValue(product.productName, { emitEvent: false });
+  }
+
+  displayProduct(product: ProductSearch): string {
+    return product ? product.productName : '';
   }
 
   addDetail(): void {
-    if (this.form.invalid) return;
+    const product = this.selectedProduct();
+    const quantity = this.quantityControl.value!;
 
-    const productId = this.form.value.productId!;
-    const quantity = this.form.value.quantity!;
-    const product = this.products().find(p => p.id === productId);
-
-    if (!product) return;
-
-    const existing = this.details().find(d => d.productId === productId);
-    if (existing) {
-      this.notification.error('El producto ya está en la venta');
+    if (!product) {
+      this.notification.error('Selecciona un producto');
       return;
     }
 
-    const subTotal = product.unitPrice * quantity;
+    if (quantity <= 0) {
+      this.notification.error('La cantidad debe ser mayor a 0');
+      return;
+    }
 
-    this.details.update(details => [...details, {
-      productId,
-      quantity,
-      productName: product.productName,
-      unitPrice: product.unitPrice,
-      subTotal
-    }]);
+    const existing = this.details().find(d => d.productId === product.id);
+    if (existing) {
+      this.details.update(details =>
+        details.map(d => d.productId === product.id
+          ? { ...d, quantity: d.quantity + quantity, subTotal: d.unitPrice * (d.quantity + quantity) }
+          : d
+        )
+      );
+    } else {
+      const subTotal = product.unitPrice * quantity;
+      this.details.update(details => [...details, {
+        productId: product.id,
+        quantity,
+        productName: product.productName,
+        unitPrice: product.unitPrice,
+        subTotal
+      }]);
+    }
 
-    this.form.reset({ productId: '', quantity: 1 });
+    this.searchControl.setValue('');
+    this.quantityControl.setValue(1);
+    this.selectedProduct.set(null);
+    this.searchResults.set([]);
   }
 
   removeDetail(productId: string): void {

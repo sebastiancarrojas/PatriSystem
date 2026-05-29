@@ -2,8 +2,9 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
 import { ApiResponse } from '../models/api-response.model';
-import { Product, CreateProductRequest, UpdateProductRequest } from '../models/product.model';
+import { Product, CreateProductRequest, UpdateProductRequest, ProductSearch } from '../models/product.model';
 import { PaginationResponse, ProductPaginationRequest } from '../models/pagination.model';
+
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
@@ -32,4 +33,8 @@ export class ProductService {
   deactivate(id: string): Observable<ApiResponse<object>> {
     return this.api.delete<ApiResponse<object>>(`Products/${id}/deactivate`);
   }
+
+  searchForSale(term: string): Observable<ProductSearch[]> {
+  return this.api.get<ProductSearch[]>('Products/search', { term });
+}
 }

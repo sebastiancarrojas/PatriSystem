@@ -104,23 +104,29 @@ export class ProductFormComponent implements OnInit {
   }
 
   openCategoryDialog(): void {
-    const dialogRef = this.dialog.open(CategoryDialogComponent, {
-      width: '400px'
-    });
+  const dialogRef = this.dialog.open(CategoryDialogComponent, {
+    width: '400px'
+  });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) this.loadCategories();
-    });
-  }
+  dialogRef.afterClosed().subscribe((category: Category | null) => {
+    if (category) {
+      this.categories.update(cats => [...cats, category]);
+      this.form.controls['categoryId'].setValue(category.id);
+    }
+  });
+}
 
-  openBrandDialog(): void {
-    const dialogRef = this.dialog.open(BrandDialogComponent, {
-      width: '400px'
-    });
+openBrandDialog(): void {
+  const dialogRef = this.dialog.open(BrandDialogComponent, {
+    width: '400px'
+  });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) this.loadBrands();
-    });
+  dialogRef.afterClosed().subscribe((brand: Brand | null) => {
+    if (brand) {
+      this.brands.update(b => [...b, brand]);
+      this.form.controls['brandId'].setValue(brand.id);
+    }
+  });
   }
 
   submit(): void {

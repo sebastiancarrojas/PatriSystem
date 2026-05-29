@@ -33,3 +33,11 @@ export interface UpdateProductRequest {
   unitPrice: number;
   unitOfMeasure: string | null;
 }
+
+export interface ProductSearch {
+  id: string;
+  productName: string;
+  barcode: string | null;
+  unitPrice: number;
+  currentStock: number;
+}

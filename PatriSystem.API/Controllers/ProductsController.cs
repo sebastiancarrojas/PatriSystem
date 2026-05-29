@@ -106,5 +106,16 @@ namespace PatriSystem.API.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> Search([FromQuery] string term)
+        {
+            var response = await _productService.SearchForSaleAsync(term);
+            if (!response.IsSuccess)
+                return BadRequest(response);
+
+            var dto = _mapper.Map<List<ProductSearchDto>>(response.Result);
+            return Ok(dto);
+        }
     }
 }

@@ -9,6 +9,7 @@ namespace PatriSystem.API.Mappings
     {
         public ProductProfile()
         {
+            CreateMap<Product, ProductSearchDto>();
             CreateMap<CreateProductRequestDto, Product>();
             CreateMap<UpdateProductRequestDto, Product>();
             CreateMap<Product, ProductResponseDto>()

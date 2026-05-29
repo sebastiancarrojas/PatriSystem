@@ -61,19 +61,15 @@ export class BrandListComponent implements OnInit {
   }
 
   submit(): void {
-    if (this.form.invalid) return;
-    this.brandService.create(this.form.value as any).subscribe({
-      next: (response) => {
-        if (response.isSuccess) {
-          this.notification.success('Marca creada correctamente');
-          this.form.reset();
-          this.showForm.set(false);
-          this.loadBrands();
-        } else {
-          this.notification.error(response.message);
-        }
-      },
-      error: () => this.notification.error('Error al crear la marca')
-    });
+  if (this.form.invalid) return;
+  this.brandService.create(this.form.value as any).subscribe({
+    next: (brand) => {
+      this.notification.success('Marca creada correctamente');
+      this.form.reset();
+      this.showForm.set(false);
+      this.loadBrands();
+    },
+    error: () => this.notification.error('Error al crear la marca')
+  });
   }
 }

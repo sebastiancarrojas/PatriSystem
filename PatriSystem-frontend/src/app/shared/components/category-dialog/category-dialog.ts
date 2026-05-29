@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { CategoryService } from '../../../core/services/category.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { Category } from '../../../core/models/category.model';
 
 @Component({
   selector: 'app-category-dialog',
@@ -36,19 +37,15 @@ export class CategoryDialogComponent {
     if (this.form.invalid) return;
 
     this.categoryService.create(this.form.value as any).subscribe({
-      next: (response) => {
-        if (response.isSuccess) {
-          this.notification.success('Categoría creada correctamente');
-          this.dialogRef.close(true);
-        } else {
-          this.notification.error(response.message);
-        }
+      next: (category: Category) => {
+        this.notification.success('Categoría creada correctamente');
+        this.dialogRef.close(category);
       },
       error: () => this.notification.error('Error al crear la categoría')
     });
   }
 
   cancel(): void {
-    this.dialogRef.close(false);
+    this.dialogRef.close(null);
   }
 }

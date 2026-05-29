@@ -60,19 +60,15 @@ export class CategoryListComponent implements OnInit {
   }
 
   submit(): void {
-    if (this.form.invalid) return;
-    this.categoryService.create(this.form.value as any).subscribe({
-      next: (response) => {
-        if (response.isSuccess) {
-          this.notification.success('Categoría creada correctamente');
-          this.form.reset();
-          this.showForm.set(false);
-          this.loadCategories();
-        } else {
-          this.notification.error(response.message);
-        }
-      },
-      error: () => this.notification.error('Error al crear la categoría')
-    });
+  if (this.form.invalid) return;
+  this.categoryService.create(this.form.value as any).subscribe({
+    next: (category) => {
+      this.notification.success('Categoría creada correctamente');
+      this.form.reset();
+      this.showForm.set(false);
+      this.loadCategories();
+    },
+    error: () => this.notification.error('Error al crear la categoría')
+  });
   }
 }

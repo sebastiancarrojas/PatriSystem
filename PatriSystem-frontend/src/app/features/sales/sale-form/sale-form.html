@@ -9,23 +9,29 @@
   <div class="form-section">
     <h3>Agregar producto</h3>
     <div class="add-product-form">
-      <mat-form-field appearance="outline">
-        <mat-label>Producto</mat-label>
-        <mat-select [formControl]="form.controls.productId">
-          @for (product of products(); track product.id) {
-            <mat-option [value]="product.id">
-              {{ product.productName }} — {{ product.unitPrice | currency:'COP':'symbol':'1.0-0' }}
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Buscar producto</mat-label>
+        <input matInput [formControl]="searchControl" 
+               [matAutocomplete]="auto"
+               placeholder="Nombre o código de barras..." />
+        <mat-icon matSuffix>search</mat-icon>
+        <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onProductSelected($event.option.value)">
+          @for (product of searchResults(); track product.id) {
+            <mat-option [value]="product">
+              <span>{{ product.productName }}</span>
+              <span class="product-price">{{ product.unitPrice | currency:'COP':'symbol':'1.0-0' }}</span>
+              <span class="product-stock">Stock: {{ product.currentStock }}</span>
             </mat-option>
           }
-        </mat-select>
+        </mat-autocomplete>
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" class="quantity-field">
         <mat-label>Cantidad</mat-label>
-        <input matInput type="number" [formControl]="form.controls.quantity" min="1" />
+        <input matInput type="number" [formControl]="quantityControl" min="1" />
       </mat-form-field>
 
-      <button mat-raised-button color="primary" (click)="addDetail()" [disabled]="form.invalid">
+      <button mat-raised-button color="primary" (click)="addDetail()" [disabled]="!selectedProduct()">
         <mat-icon>add</mat-icon>
         Agregar
       </button>

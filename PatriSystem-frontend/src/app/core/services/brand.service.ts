@@ -12,7 +12,7 @@ export class BrandService {
     return this.api.get<Brand[]>('Brands');
   }
 
-  create(brand: CreateBrandRequest): Observable<ApiResponse<object>> {
-    return this.api.post<ApiResponse<object>>('Brands', brand);
+  create(brand: CreateBrandRequest): Observable<Brand> {
+    return this.api.post<Brand>('Brands', brand);
   }
 }

@@ -12,7 +12,7 @@ export class CategoryService {
     return this.api.get<Category[]>('Categories');
   }
 
-  create(category: CreateCategoryRequest): Observable<ApiResponse<object>> {
-    return this.api.post<ApiResponse<object>>('Categories', category);
+  create(category: CreateCategoryRequest): Observable<Category> {
+    return this.api.post<Category>('Categories', category);
   }
 }

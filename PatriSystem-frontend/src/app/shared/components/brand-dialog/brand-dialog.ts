@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { BrandService } from '../../../core/services/brand.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { Brand } from '../../../core/models/brand.model';
 
 @Component({
   selector: 'app-brand-dialog',
@@ -37,19 +38,15 @@ export class BrandDialogComponent {
     if (this.form.invalid) return;
 
     this.brandService.create(this.form.value as any).subscribe({
-      next: (response) => {
-        if (response.isSuccess) {
-          this.notification.success('Marca creada correctamente');
-          this.dialogRef.close(true);
-        } else {
-          this.notification.error(response.message);
-        }
+      next: (brand: Brand) => {
+        this.notification.success('Marca creada correctamente');
+        this.dialogRef.close(brand);
       },
       error: () => this.notification.error('Error al crear la marca')
     });
   }
 
   cancel(): void {
-    this.dialogRef.close(false);
+    this.dialogRef.close(null);
   }
 }

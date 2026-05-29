@@ -125,5 +125,18 @@ namespace PatriSystem.Domain.Services
                 return Response<PaginationResponse<Product>>.Failure(ex, "Error al obtener los productos");
             }
         }
+
+        public async Task<Response<List<Product>>> SearchForSaleAsync(string term)
+        {
+            try
+            {
+                var products = await _productRepository.SearchForSaleAsync(term);
+                return Response<List<Product>>.Success(products);
+            }
+            catch (Exception ex)
+            {
+                return Response<List<Product>>.Failure(ex, "Error al buscar productos");
+            }
+        }
     }
 }

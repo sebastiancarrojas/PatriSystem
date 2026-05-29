@@ -101,6 +101,21 @@ namespace PatriSystem.DataAccess.Repositories
             };
         }
 
+        public async Task<List<Product>> SearchForSaleAsync(string term)
+        {
+            if (string.IsNullOrWhiteSpace(term))
+                return new List<Product>();
+
+            return await _context.Products
+                .Where(p =>
+                    p.Status == true &&
+                    (p.ProductName.Contains(term) ||
+                     (p.Barcode != null && p.Barcode.Contains(term))))
+                .OrderBy(p => p.ProductName)
+                .Take(10)
+                .ToListAsync();
+        }
+
     }
 }
     

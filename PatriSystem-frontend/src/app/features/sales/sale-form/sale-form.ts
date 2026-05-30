@@ -18,6 +18,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialog } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
 import { SaleConfirmDialogComponent } from '../../../shared/components/sale-confirm-dialog/sale-confirm-dialog';
+import { TempProductDialogComponent } from '../../../shared/components/temp-product-dialog/temp-product-dialog';
 
 @Component({
   selector: 'app-sale-form',
@@ -180,5 +181,40 @@ registerSale(): void {
       : d
     )
   );
+  }
+
+  updatePrice(productId: string, price: number): void {
+  if (price <= 0) {
+    this.notification.error('El precio debe ser mayor a 0');
+    return;
+  }
+
+  this.details.update(details =>
+    details.map(d => d.productId === productId
+      ? { ...d, unitPrice: price, subTotal: price * d.quantity }
+      : d
+    )
+  );
+  }
+  
+  openTempProductDialog(): void {
+  const dialogRef = this.dialog.open(TempProductDialogComponent, {
+    width: '400px'
+  });
+
+  dialogRef.afterClosed().subscribe((product: { productName: string; unitPrice: number } | null) => {
+    if (product) {
+      const tempId = 'temp-' + Date.now();
+      const subTotal = product.unitPrice * 1;
+
+      this.details.update(details => [...details, {
+        productId: tempId,
+        quantity: 1,
+        productName: product.productName,
+        unitPrice: product.unitPrice,
+        subTotal
+      }]);
+    }
+  });
   }
 }

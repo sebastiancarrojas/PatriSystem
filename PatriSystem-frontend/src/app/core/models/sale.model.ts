@@ -15,8 +15,11 @@ export interface Sale {
 }
 
 export interface CreateSaleDetailRequest {
-  productId: string;
+  productId?: string;
   quantity: number;
+  unitPrice: number;
+  isTemporary: boolean;
+  productName?: string;
 }
 
 export interface CreateSaleRequest {

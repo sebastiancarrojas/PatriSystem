@@ -48,7 +48,7 @@ export class SaleFormComponent {
   private dialog = inject(MatDialog);
 
   searchResults = signal<ProductSearch[]>([]);
-  details = signal<(CreateSaleDetailRequest & { productName: string; unitPrice: number; subTotal: number })[]>([]);
+  details = signal<(CreateSaleDetailRequest & { productName: string; subTotal: number })[]>([]);
   loading = signal(false);
   displayedColumns: string[] = ['productName', 'quantity', 'unitPrice', 'subTotal', 'actions'];
 
@@ -110,6 +110,7 @@ export class SaleFormComponent {
         quantity,
         productName: product.productName,
         unitPrice: product.unitPrice,
+        isTemporary: false,
         subTotal
       }]);
     }
@@ -146,10 +147,16 @@ export class SaleFormComponent {
 registerSale(): void {
   this.loading.set(true);
   const sale = {
-    details: this.details().map(d => ({
-      productId: d.productId,
-      quantity: d.quantity
-    }))
+    details: this.details().map(d => {
+      const isTemp = d.productId != null && d.productId.startsWith('temp-');
+      return {
+        productId: isTemp ? undefined : d.productId,
+        quantity: d.quantity,
+        unitPrice: d.unitPrice,
+        isTemporary: isTemp,
+        productName: isTemp ? d.productName : undefined
+      };
+    })
   };
 
   this.saleService.create(sale).subscribe({
@@ -212,6 +219,7 @@ registerSale(): void {
         quantity: 1,
         productName: product.productName,
         unitPrice: product.unitPrice,
+        isTemporary: true,
         subTotal
       }]);
     }

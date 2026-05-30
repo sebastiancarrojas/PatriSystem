@@ -15,6 +15,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialog } from '@angular/material/dialog';
+import { MatDialogModule } from '@angular/material/dialog';
+import { SaleConfirmDialogComponent } from '../../../shared/components/sale-confirm-dialog/sale-confirm-dialog';
 
 @Component({
   selector: 'app-sale-form',
@@ -29,7 +32,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatFormFieldModule,
     MatInputModule,
     MatAutocompleteModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatDialogModule
   ],
   templateUrl: './sale-form.html',
   styleUrl: './sale-form.scss'
@@ -40,6 +44,7 @@ export class SaleFormComponent {
   private notification = inject(NotificationService);
   private router = inject(Router);
   private fb = inject(FormBuilder);
+  private dialog = inject(MatDialog);
 
   searchResults = signal<ProductSearch[]>([]);
   details = signal<(CreateSaleDetailRequest & { productName: string; unitPrice: number; subTotal: number })[]>([]);
@@ -119,33 +124,61 @@ export class SaleFormComponent {
   }
 
   submit(): void {
-    if (this.details().length === 0) {
-      this.notification.error('Agrega al menos un producto');
-      return;
+  if (this.details().length === 0) {
+    this.notification.error('Agrega al menos un producto');
+    return;
+  }
+
+  const dialogRef = this.dialog.open(SaleConfirmDialogComponent, {
+    width: '400px',
+    data: {
+      total: this.total,
+      items: this.details().length
     }
+  });
 
-    this.loading.set(true);
-    const sale = {
-      details: this.details().map(d => ({
-        productId: d.productId,
-        quantity: d.quantity
-      }))
-    };
+  dialogRef.afterClosed().subscribe(confirmed => {
+    if (confirmed) this.registerSale();
+  });
+}
 
-    this.saleService.create(sale).subscribe({
-      next: (response) => {
-        if (response.isSuccess) {
-          this.notification.success('Venta registrada correctamente');
-          this.router.navigate(['/sales']);
-        } else {
-          this.notification.error(response.message);
-        }
-        this.loading.set(false);
-      },
-      error: () => {
-        this.notification.error('Error al registrar la venta');
-        this.loading.set(false);
+registerSale(): void {
+  this.loading.set(true);
+  const sale = {
+    details: this.details().map(d => ({
+      productId: d.productId,
+      quantity: d.quantity
+    }))
+  };
+
+  this.saleService.create(sale).subscribe({
+    next: (response) => {
+      if (response.isSuccess) {
+        this.notification.success('Venta registrada correctamente');
+        this.router.navigate(['/sales']);
+      } else {
+        this.notification.error(response.message);
       }
-    });
+      this.loading.set(false);
+    },
+    error: () => {
+      this.notification.error('Error al registrar la venta');
+      this.loading.set(false);
+    }
+  });
+  }
+
+  updateQuantity(productId: string, quantity: number): void {
+  if (quantity <= 0) {
+    this.notification.error('La cantidad debe ser mayor a 0');
+    return;
+  }
+
+  this.details.update(details =>
+    details.map(d => d.productId === productId
+      ? { ...d, quantity, subTotal: d.unitPrice * quantity }
+      : d
+    )
+  );
   }
 }

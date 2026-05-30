@@ -5,13 +5,15 @@
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
         public decimal SubTotal { get; set; }
+        public bool IsTemporary { get; set; } = false;
+        public string? ProductName { get; set; }
 
         // Foreign Keys
         public Guid SaleId { get; set; }
-        public Guid ProductId { get; set; }
+        public Guid? ProductId { get; set; }
 
         // Navigation Properties
         public Sale Sale { get; set; } = null!;
-        public Product Product { get; set; } = null!;
+        public Product? Product { get; set; }
     }
 }

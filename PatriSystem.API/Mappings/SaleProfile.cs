@@ -11,14 +11,15 @@ namespace PatriSystem.API.Mappings
         {
             // Request mappings
             CreateMap<CreateSaleRequestDto, Sale>()
-                .ForMember(dest => dest.SaleDetails, opt => opt.MapFrom(src => src.Details));
+               .ForMember(dest => dest.SaleDetails, opt => opt.MapFrom(src => src.Details));
 
             CreateMap<CreateSaleDetailRequestDto, SaleDetail>();
 
             // Response mappings
             CreateMap<Sale, SaleResponseDto>();
             CreateMap<SaleDetail, SaleDetailResponseDto>()
-                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.ProductName));
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src =>
+                    src.IsTemporary ? src.ProductName : src.Product != null ? src.Product.ProductName : string.Empty));
         }
     }
 }

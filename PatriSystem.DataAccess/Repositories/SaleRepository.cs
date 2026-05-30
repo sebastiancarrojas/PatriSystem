@@ -19,7 +19,7 @@ namespace PatriSystem.DataAccess.Repositories
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                foreach (var detail in sale.SaleDetails)
+                foreach (var detail in sale.SaleDetails.Where(d => !d.IsTemporary))
                 {
                     var product = products.First(p => p.Id == detail.ProductId);
                     product.CurrentStock -= detail.Quantity;

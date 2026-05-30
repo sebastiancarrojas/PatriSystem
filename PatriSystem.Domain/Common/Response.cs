@@ -6,7 +6,7 @@
         public string? Message { get; set; }
         public List<string> Errors { get; set; } = new();
         public T? Result { get; set; }
-        public Exception? Exception { get; set; }
+        public string? ExceptionMessage { get; set; }
 
         public static Response<T> Failure(Exception? ex, string message = "Ha ocurrido un error al generar la solicitud")
         {
@@ -17,7 +17,7 @@
                 Errors = ex != null
                     ? new List<string> { ex.Message }
                     : new List<string> { message },
-                Exception = ex
+                ExceptionMessage = ex?.Message
             };
         }
 
@@ -28,7 +28,7 @@
                 IsSuccess = false,
                 Message = message,
                 Errors = errors ?? new List<string>(),
-                Exception = null
+                ExceptionMessage = null
             };
         }
 
@@ -39,7 +39,7 @@
                 IsSuccess = true,
                 Message = message,
                 Result = result,
-                Exception = null
+                ExceptionMessage = null
             };
         }
 
@@ -49,7 +49,7 @@
             {
                 IsSuccess = true,
                 Message = message,
-                Exception = null
+                ExceptionMessage = null
             };
         }
     }

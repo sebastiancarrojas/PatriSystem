@@ -1,0 +1,22 @@
+<h2 mat-dialog-title>Confirmar Venta</h2>
+
+<mat-dialog-content>
+  <p>¿Estás seguro de registrar esta venta?</p>
+  <div class="summary">
+    <div class="summary-item">
+      <span>Productos:</span>
+      <strong>{{ data.items }}</strong>
+    </div>
+    <div class="summary-item">
+      <span>Total:</span>
+      <strong>{{ data.total | currency:'COP':'symbol':'1.0-0' }}</strong>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancelar</button>
+  <button mat-raised-button color="primary" (click)="confirm()">
+    Confirmar
+  </button>
+</mat-dialog-actions>

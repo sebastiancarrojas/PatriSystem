@@ -2,6 +2,7 @@
 using PatriSystem.Domain.Entities;
 using PatriSystem.Domain.Interfaces.Repositories;
 using PatriSystem.Domain.Interfaces.Services;
+using PatriSystem.Domain.Pagination;
 
 namespace PatriSystem.Domain.Services
 {
@@ -43,6 +44,46 @@ namespace PatriSystem.Domain.Services
             catch (Exception ex)
             {
                 return Response<List<Brand>>.Failure(ex, "Error al obtener las marcas");
+            }
+        }
+
+        public async Task<Response<object>> UpdateAsync(Guid id, Brand brand)
+        {
+            try
+            {
+                var existing = await _brandRepository.GetByIdAsync(id);
+                if (existing == null)
+                    return Response<object>.Failure("No se encontró la marca");
+
+                if (!string.IsNullOrEmpty(brand.BrandName) && existing.BrandName != brand.BrandName)
+                {
+                    var exists = await _brandRepository.ExistsWithNameAsync(brand.BrandName);
+                    if (exists)
+                        return Response<object>.Failure("Ya existe una marca con ese nombre");
+                }
+
+                existing.BrandName = brand.BrandName;
+                existing.BrandDescription = brand.BrandDescription;
+
+                await _brandRepository.UpdateAsync(existing);
+                return Response<object>.Success("marca actualizada correctamente");
+            }
+            catch (Exception ex)
+            {
+                return Response<object>.Failure(ex, "Error al actualizar la marca");
+            }
+        }
+
+        public async Task<Response<PaginationResponse<Brand>>> GetPaginatedAsync(BrandPaginationRequest request)
+        {
+            try
+            {
+                var result = await _brandRepository.GetPaginatedAsync(request);
+                return Response<PaginationResponse<Brand>>.Success(result);
+            }
+            catch (Exception ex)
+            {
+                return Response<PaginationResponse<Brand>>.Failure(ex, "Error al obtener las marcas");
             }
         }
     }

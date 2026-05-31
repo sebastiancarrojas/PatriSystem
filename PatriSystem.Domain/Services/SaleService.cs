@@ -2,6 +2,7 @@
 using PatriSystem.Domain.Entities;
 using PatriSystem.Domain.Interfaces.Repositories;
 using PatriSystem.Domain.Interfaces.Services;
+using PatriSystem.Domain.Pagination;
 
 namespace PatriSystem.Domain.Services
 {
@@ -148,6 +149,19 @@ namespace PatriSystem.Domain.Services
             catch (Exception ex)
             {
                 return Response<Sale>.Failure(ex, "Error al obtener la venta");
+            }
+        }
+
+        public async Task<Response<PaginationResponse<Sale>>> GetPaginatedAsync(SalePaginationRequest request)
+        {
+            try
+            {
+                var result = await _saleRepository.GetPaginatedAsync(request);
+                return Response<PaginationResponse<Sale>>.Success(result);
+            }
+            catch (Exception ex)
+            {
+                return Response<PaginationResponse<Sale>>.Failure(ex, "Error al obtener las ventas");
             }
         }
     }

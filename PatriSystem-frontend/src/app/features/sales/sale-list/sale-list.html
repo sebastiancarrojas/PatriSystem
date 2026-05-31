@@ -7,6 +7,33 @@
     </button>
   </div>
 
+  <div class="filters">
+    <mat-form-field appearance="outline">
+      <mat-label>Buscar</mat-label>
+      <input matInput [formControl]="searchControl" placeholder="Producto..." />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Fecha inicio</mat-label>
+      <input matInput [matDatepicker]="startPicker" [formControl]="startDateControl" />
+      <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+      <mat-datepicker #startPicker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Fecha fin</mat-label>
+      <input matInput [matDatepicker]="endPicker" [formControl]="endDateControl" />
+      <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+      <mat-datepicker #endPicker></mat-datepicker>
+    </mat-form-field>
+
+    <button mat-stroked-button (click)="clearFilters()">
+      <mat-icon>clear</mat-icon>
+      Limpiar
+    </button>
+  </div>
+
   @if (loading()) {
     <div class="spinner-container">
       <mat-spinner></mat-spinner>
@@ -45,8 +72,14 @@
     @if (sales().length === 0) {
       <div class="empty-state">
         <mat-icon>point_of_sale</mat-icon>
-        <p>No hay ventas registradas</p>
+        <p>No se encontraron ventas</p>
       </div>
     }
   }
+
+  <app-paginator
+    [currentPage]="currentPage()"
+    [totalPages]="totalPages()"
+    (pageChange)="onPageChange($event)">
+  </app-paginator>
 </div>

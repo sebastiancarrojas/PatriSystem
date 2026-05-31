@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormControl, Validators } from '@angular/forms';
 import { BrandService } from '../../../core/services/brand.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { Brand } from '../../../core/models/brand.model';
@@ -10,6 +10,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { PaginatorComponent } from '../../../shared/components/paginator/paginator';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
   selector: 'app-brand-list',
@@ -22,7 +24,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatIconModule,
     MatFormFieldModule,
     MatInputModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    PaginatorComponent
   ],
   templateUrl: './brand-list.html',
   styleUrl: './brand-list.scss'
@@ -35,22 +38,36 @@ export class BrandListComponent implements OnInit {
   brands = signal<Brand[]>([]);
   loading = signal(false);
   showForm = signal(false);
-  displayedColumns: string[] = ['brandName', 'brandDescription', 'createdAt'];
+  editingBrand = signal<Brand | null>(null);
+  currentPage = signal(1);
+  totalPages = signal(1);
+  displayedColumns: string[] = ['brandName', 'brandDescription', 'createdAt', 'actions'];
+
+  searchControl = new FormControl('');
 
   form = this.fb.group({
-    brandName: ['', Validators.required],
-    brandDescription: [null]
+  brandName: ['', Validators.required],
+  brandDescription: [null as string | null]
   });
 
   ngOnInit(): void {
     this.loadBrands();
+
+    this.searchControl.valueChanges.pipe(
+      debounceTime(400),
+      distinctUntilChanged()
+    ).subscribe(() => {
+      this.currentPage.set(1);
+      this.loadBrands();
+    });
   }
 
   loadBrands(): void {
     this.loading.set(true);
-    this.brandService.getAll().subscribe({
-      next: (brands) => {
-        this.brands.set(brands);
+    this.brandService.getPaginated(this.currentPage(), this.searchControl.value ?? undefined).subscribe({
+      next: (response) => {
+        this.brands.set(response.items);
+        this.totalPages.set(response.totalPages);
         this.loading.set(false);
       },
       error: () => {
@@ -60,16 +77,54 @@ export class BrandListComponent implements OnInit {
     });
   }
 
+  onPageChange(page: number): void {
+    this.currentPage.set(page);
+    this.loadBrands();
+  }
+
+  openCreate(): void {
+    this.editingBrand.set(null);
+    this.form.reset();
+    this.showForm.set(true);
+  }
+
+  openEdit(brand: Brand): void {
+    this.editingBrand.set(brand);
+    this.form.patchValue({ brandName: brand.brandName, brandDescription: brand.brandDescription });
+    this.showForm.set(true);
+  }
+
   submit(): void {
-  if (this.form.invalid) return;
-  this.brandService.create(this.form.value as any).subscribe({
-    next: (brand) => {
-      this.notification.success('Marca creada correctamente');
-      this.form.reset();
-      this.showForm.set(false);
-      this.loadBrands();
-    },
-    error: () => this.notification.error('Error al crear la marca')
-  });
+    if (this.form.invalid) return;
+
+    const editing = this.editingBrand();
+    if (editing) {
+      this.brandService.update(editing.id, this.form.value.brandName!, this.form.value.brandDescription ?? undefined).subscribe({
+        next: () => {
+          this.notification.success('Marca actualizada correctamente');
+          this.form.reset();
+          this.showForm.set(false);
+          this.editingBrand.set(null);
+          this.loadBrands();
+        },
+        error: () => this.notification.error('Error al actualizar la marca')
+      });
+    } else {
+      this.brandService.create(this.form.value as any).subscribe({
+        next: () => {
+          this.notification.success('Marca creada correctamente');
+          this.form.reset();
+          this.showForm.set(false);
+          this.loadBrands();
+        },
+        error: () => this.notification.error('Error al crear la marca')
+      });
+    }
+  }
+
+  cancel(): void {
+    this.showForm.set(false);
+    this.editingBrand.set(null);
+    this.form.reset();
   }
 }

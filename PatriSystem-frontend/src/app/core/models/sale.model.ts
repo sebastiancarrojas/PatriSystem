@@ -25,3 +25,4 @@ export interface CreateSaleDetailRequest {
 export interface CreateSaleRequest {
   details: CreateSaleDetailRequest[];
 }
+

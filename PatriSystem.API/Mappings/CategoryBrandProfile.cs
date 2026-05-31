@@ -11,10 +11,12 @@ namespace PatriSystem.API.Mappings
         {
             // Category mappings
             CreateMap<CreateCategoryRequestDto, Category>();
+            CreateMap<UpdateCategoryRequestDto, Category>();
             CreateMap<Category, CategoryResponseDto>();
 
             // Brand mappings
             CreateMap<CreateBrandRequestDto, Brand>();
+            CreateMap<UpdateBrandRequestDto, Brand>();
             CreateMap<Brand, BrandResponseDto>();
         }
     }

@@ -17,3 +17,11 @@ export interface ProductPaginationRequest {
   brandId?: string;
   status?: boolean;
 }
+
+export interface SalePaginationRequest {
+  page?: number;
+  recordsPerPage?: number;
+  filter?: string;
+  startDate?: string;
+  endDate?: string;
+}

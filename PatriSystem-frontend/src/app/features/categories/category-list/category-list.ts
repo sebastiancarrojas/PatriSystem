@@ -10,6 +10,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { PaginatorComponent } from '../../../shared/components/paginator/paginator';
+import { FormControl } from '@angular/forms';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
   selector: 'app-category-list',
@@ -22,7 +25,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatIconModule,
     MatFormFieldModule,
     MatInputModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    PaginatorComponent
   ],
   templateUrl: './category-list.html',
   styleUrl: './category-list.scss'
@@ -35,7 +39,12 @@ export class CategoryListComponent implements OnInit {
   categories = signal<Category[]>([]);
   loading = signal(false);
   showForm = signal(false);
-  displayedColumns: string[] = ['categoryName', 'createdAt'];
+  editingCategory = signal<Category | null>(null);
+  currentPage = signal(1);
+  totalPages = signal(1);
+  displayedColumns: string[] = ['categoryName', 'createdAt', 'actions'];
+
+  searchControl = new FormControl('');
 
   form = this.fb.group({
     categoryName: ['', Validators.required]
@@ -43,13 +52,22 @@ export class CategoryListComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadCategories();
+
+    this.searchControl.valueChanges.pipe(
+      debounceTime(400),
+      distinctUntilChanged()
+    ).subscribe(() => {
+      this.currentPage.set(1);
+      this.loadCategories();
+    });
   }
 
   loadCategories(): void {
     this.loading.set(true);
-    this.categoryService.getAll().subscribe({
-      next: (categories) => {
-        this.categories.set(categories);
+    this.categoryService.getPaginated(this.currentPage(), this.searchControl.value ?? undefined).subscribe({
+      next: (response) => {
+        this.categories.set(response.items);
+        this.totalPages.set(response.totalPages);
         this.loading.set(false);
       },
       error: () => {
@@ -59,16 +77,54 @@ export class CategoryListComponent implements OnInit {
     });
   }
 
+  onPageChange(page: number): void {
+    this.currentPage.set(page);
+    this.loadCategories();
+  }
+
+  openCreate(): void {
+    this.editingCategory.set(null);
+    this.form.reset();
+    this.showForm.set(true);
+  }
+
+  openEdit(category: Category): void {
+    this.editingCategory.set(category);
+    this.form.patchValue({ categoryName: category.categoryName });
+    this.showForm.set(true);
+  }
+
   submit(): void {
-  if (this.form.invalid) return;
-  this.categoryService.create(this.form.value as any).subscribe({
-    next: (category) => {
-      this.notification.success('Categoría creada correctamente');
-      this.form.reset();
-      this.showForm.set(false);
-      this.loadCategories();
-    },
-    error: () => this.notification.error('Error al crear la categoría')
-  });
+    if (this.form.invalid) return;
+
+    const editing = this.editingCategory();
+    if (editing) {
+      this.categoryService.update(editing.id, this.form.value as any).subscribe({
+        next: () => {
+          this.notification.success('Categoría actualizada correctamente');
+          this.form.reset();
+          this.showForm.set(false);
+          this.editingCategory.set(null);
+          this.loadCategories();
+        },
+        error: () => this.notification.error('Error al actualizar la categoría')
+      });
+    } else {
+      this.categoryService.create(this.form.value as any).subscribe({
+        next: () => {
+          this.notification.success('Categoría creada correctamente');
+          this.form.reset();
+          this.showForm.set(false);
+          this.loadCategories();
+        },
+        error: () => this.notification.error('Error al crear la categoría')
+      });
+    }
+  }
+
+  cancel(): void {
+    this.showForm.set(false);
+    this.editingCategory.set(null);
+    this.form.reset();
   }
 }

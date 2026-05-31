@@ -4,6 +4,8 @@ using PatriSystem.API.DTOs.Request;
 using PatriSystem.API.DTOs.Response;
 using PatriSystem.Domain.Entities;
 using PatriSystem.Domain.Interfaces.Services;
+using PatriSystem.Domain.Pagination;
+using PatriSystem.Domain.Services;
 
 namespace PatriSystem.API.Controllers
 {
@@ -55,6 +57,29 @@ namespace PatriSystem.API.Controllers
                 return BadRequest(response);
 
             return Ok(response);
+        }
+
+        [HttpGet("paginated")]
+        public async Task<IActionResult> GetPaginated([FromQuery] SalePaginationRequest request)
+        {
+            var response = await _saleService.GetPaginatedAsync(request);
+            if (!response.IsSuccess)
+                return BadRequest(response);
+
+            var items = _mapper.Map<List<SaleResponseDto>>(response.Result.Items);
+            var result = new
+            {
+                currentPage = response.Result.CurrentPage,
+                totalPages = response.Result.TotalPages,
+                recordsPerPage = response.Result.RecordsPerPage,
+                totalCount = response.Result.TotalCount,
+                hasPrevious = response.Result.HasPrevious,
+                hasNext = response.Result.HasNext,
+                filter = response.Result.Filter,
+                items
+            };
+
+            return Ok(result);
         }
     }
 }

@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PatriSystem.DataAccess.Context;
+using PatriSystem.DataAcess.Pagination;
 using PatriSystem.Domain.Entities;
 using PatriSystem.Domain.Interfaces.Repositories;
+using PatriSystem.Domain.Pagination;
 
 namespace PatriSystem.DataAccess.Repositories
 {
@@ -52,6 +54,43 @@ namespace PatriSystem.DataAccess.Repositories
                 .Include(s => s.SaleDetails)
                     .ThenInclude(sd => sd.Product)
                 .FirstOrDefaultAsync(s => s.Id == id);
+        }
+
+        public async Task<PaginationResponse<Sale>> GetPaginatedAsync(SalePaginationRequest request)
+        {
+            var queryable = _context.Sales
+                .Include(s => s.SaleDetails)
+                    .ThenInclude(sd => sd.Product)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(request.Filter))
+            {
+                string filter = request.Filter.ToLower();
+                queryable = queryable.Where(s =>
+                    s.SaleDetails.Any(sd =>
+                        sd.ProductName != null && sd.ProductName.ToLower().Contains(filter) ||
+                        sd.Product != null && sd.Product.ProductName.ToLower().Contains(filter)));
+            }
+
+            if (request.StartDate.HasValue)
+                queryable = queryable.Where(s => s.SaleDate >= request.StartDate.Value);
+
+            if (request.EndDate.HasValue)
+                queryable = queryable.Where(s => s.SaleDate <= request.EndDate.Value);
+
+            queryable = queryable.OrderByDescending(s => s.SaleDate);
+
+            var pagedList = await PagedList<Sale>.ToPagedListAsync(queryable, request);
+
+            return new PaginationResponse<Sale>
+            {
+                CurrentPage = pagedList.CurrentPage,
+                TotalPages = pagedList.TotalPages,
+                RecordsPerPage = pagedList.RecordsPerPage,
+                TotalCount = pagedList.TotalCount,
+                Filter = request.Filter,
+                Items = pagedList.ToList()
+            };
         }
     }
 }

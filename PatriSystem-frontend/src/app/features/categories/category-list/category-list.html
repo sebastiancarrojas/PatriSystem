@@ -1,9 +1,9 @@
 <div class="container">
   <div class="header">
     <h2>Categorías</h2>
-    <button mat-raised-button color="primary" (click)="showForm.set(!showForm())">
-      <mat-icon>{{ showForm() ? 'close' : 'add' }}</mat-icon>
-      {{ showForm() ? 'Cancelar' : 'Nueva Categoría' }}
+    <button mat-raised-button color="primary" (click)="openCreate()">
+      <mat-icon>add</mat-icon>
+      Nueva Categoría
     </button>
   </div>
 
@@ -17,10 +17,17 @@
         }
       </mat-form-field>
       <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
-        Guardar
+        {{ editingCategory() ? 'Actualizar' : 'Guardar' }}
       </button>
+      <button mat-button type="button" (click)="cancel()">Cancelar</button>
     </form>
   }
+
+  <mat-form-field appearance="outline" class="search-field">
+    <mat-label>Buscar categoría</mat-label>
+    <input matInput [formControl]="searchControl" />
+    <mat-icon matSuffix>search</mat-icon>
+  </mat-form-field>
 
   @if (loading()) {
     <div class="spinner-container">
@@ -28,6 +35,7 @@
     </div>
   } @else {
     <table mat-table [dataSource]="categories()" class="mat-elevation-z2">
+
       <ng-container matColumnDef="categoryName">
         <th mat-header-cell *matHeaderCellDef>Nombre</th>
         <td mat-cell *matCellDef="let category">{{ category.categoryName }}</td>
@@ -38,6 +46,15 @@
         <td mat-cell *matCellDef="let category">{{ category.createdAt | date:'dd/MM/yyyy' }}</td>
       </ng-container>
 
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Acciones</th>
+        <td mat-cell *matCellDef="let category">
+          <button mat-icon-button color="primary" (click)="openEdit(category)">
+            <mat-icon>edit</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
     </table>
@@ -45,8 +62,14 @@
     @if (categories().length === 0) {
       <div class="empty-state">
         <mat-icon>category</mat-icon>
-        <p>No hay categorías registradas</p>
+        <p>No se encontraron categorías</p>
       </div>
     }
   }
+
+  <app-paginator
+    [currentPage]="currentPage()"
+    [totalPages]="totalPages()"
+    (pageChange)="onPageChange($event)">
+  </app-paginator>
 </div>

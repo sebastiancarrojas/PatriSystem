@@ -74,11 +74,10 @@ namespace PatriSystem.DataAccess.Repositories
 
             if (!string.IsNullOrWhiteSpace(request.Filter))
             {
-                string filter = request.Filter.ToLower();
-                queryable = queryable.Where(s =>
-                    s.SaleDetails.Any(sd =>
-                        sd.ProductName != null && sd.ProductName.ToLower().Contains(filter) ||
-                        sd.Product != null && sd.Product.ProductName.ToLower().Contains(filter)));
+                if (int.TryParse(request.Filter.Replace("VTA-", "").Replace("vta-", ""), out int saleNum))
+                {
+                    queryable = queryable.Where(s => s.SaleNumber == saleNum);
+                }
             }
 
             if (request.StartDate.HasValue)

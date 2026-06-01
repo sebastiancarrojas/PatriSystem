@@ -14,6 +14,10 @@
     <mat-card class="info-card">
       <mat-card-content>
         <div class="info-grid">
+            <div class="info-item">
+            <span class="label">Código</span>
+            <span class="value">{{ sale()!.saleNumberFormatted }}</span>
+          </div>
           <div class="info-item">
             <span class="label">Fecha</span>
             <span class="value">{{ sale()!.saleDate | date:'dd/MM/yyyy HH:mm' }}</span>

@@ -45,7 +45,7 @@ export class SaleListComponent implements OnInit {
   loading = signal(false);
   currentPage = signal(1);
   totalPages = signal(1);
-  displayedColumns: string[] = ['saleDate', 'totalAmount', 'items', 'actions'];
+  displayedColumns: string[] = ['saleNumberFormatted', 'saleDate', 'totalAmount', 'items', 'actions'];
 
   searchControl = new FormControl('');
   startDateControl = new FormControl<Date | null>(null);

@@ -9,6 +9,8 @@ export interface SaleDetail {
 
 export interface Sale {
   id: string;
+  saleNumberFormatted: string;
+  saleNumber: number;
   saleDate: string;
   totalAmount: number;
   saleDetails: SaleDetail[];

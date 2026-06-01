@@ -21,10 +21,19 @@ namespace PatriSystem.DataAccess.Repositories
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                foreach (var detail in sale.SaleDetails.Where(d => !d.IsTemporary))
+                // Asignar número de venta correlativo
+                var lastSaleNumber = await _context.Sales
+                    .OrderByDescending(s => s.SaleNumber)
+                    .Select(s => s.SaleNumber)
+                    .FirstOrDefaultAsync();
+
+                sale.SaleNumber = lastSaleNumber + 1;
+
+                foreach (var detail in sale.SaleDetails.Where(d => !d.IsTemporary && d.ProductId != null))
                 {
-                    var product = products.First(p => p.Id == detail.ProductId);
-                    product.CurrentStock -= detail.Quantity;
+                    var product = products.FirstOrDefault(p => p.Id == detail.ProductId);
+                    if (product != null)
+                        product.CurrentStock -= detail.Quantity;
                 }
 
                 await _context.Sales.AddAsync(sale);

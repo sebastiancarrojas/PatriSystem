@@ -16,7 +16,8 @@ namespace PatriSystem.API.Mappings
             CreateMap<CreateSaleDetailRequestDto, SaleDetail>();
 
             // Response mappings
-            CreateMap<Sale, SaleResponseDto>();
+            CreateMap<Sale, SaleResponseDto>()
+                .ForMember(dest => dest.SaleNumberFormatted, opt => opt.MapFrom(src => src.SaleNumberFormatted));
             CreateMap<SaleDetail, SaleDetailResponseDto>()
                 .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src =>
                     src.IsTemporary ? src.ProductName : src.Product != null ? src.Product.ProductName : string.Empty));

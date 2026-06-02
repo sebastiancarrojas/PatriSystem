@@ -27,12 +27,14 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IBrandRepository, BrandRepository>();
 builder.Services.AddScoped<ISaleRepository, SaleRepository>();
+builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
 
 // Services
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IBrandService, BrandService>();
 builder.Services.AddScoped<ISaleService, SaleService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));

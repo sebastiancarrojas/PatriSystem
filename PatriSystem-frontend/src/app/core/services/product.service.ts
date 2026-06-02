@@ -36,5 +36,9 @@ export class ProductService {
 
   searchForSale(term: string): Observable<ProductSearch[]> {
   return this.api.get<ProductSearch[]>('Products/search', { term });
-}
+  }
+
+  activate(id: string): Observable<ApiResponse<object>> {
+  return this.api.patch<ApiResponse<object>>(`Products/${id}/activate`, {});
+  }
 }

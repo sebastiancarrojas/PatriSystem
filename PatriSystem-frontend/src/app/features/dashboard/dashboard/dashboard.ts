@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -9,6 +9,7 @@ import { Chart, ChartData, ChartOptions, registerables } from 'chart.js';
 import { DashboardService } from '../../../core/services/dashboard.service';
 import { Dashboard } from '../../../core/models/dashboard.model';
 import { NotificationService } from '../../../core/services/notification.service';
+
 
 Chart.register(...registerables);
 
@@ -21,7 +22,7 @@ Chart.register(...registerables);
     MatIconModule,
     MatButtonModule,
     MatProgressSpinnerModule,
-    BaseChartDirective
+    BaseChartDirective,
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
@@ -29,6 +30,7 @@ Chart.register(...registerables);
 export class DashboardComponent implements OnInit {
   private dashboardService = inject(DashboardService);
   private notification = inject(NotificationService);
+  private router = inject(Router);
 
   dashboard = signal<Dashboard | null>(null);
   loading = signal(false);
@@ -79,5 +81,13 @@ export class DashboardComponent implements OnInit {
         tension: 0.4
       }]
     };
+  }
+
+  goToNewSale(): void {
+  this.router.navigate(['/sales/create'], { queryParams: { returnUrl: '/dashboard' } });
+  }
+
+goToNewProduct(): void {
+  this.router.navigate(['/products/create'], { queryParams: { returnUrl: '/dashboard' } });
   }
 }

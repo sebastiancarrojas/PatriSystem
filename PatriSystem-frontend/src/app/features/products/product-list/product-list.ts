@@ -19,6 +19,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { PaginatorComponent } from '../../../shared/components/paginator/paginator';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog';
 
 @Component({
   selector: 'app-product-list',
@@ -34,7 +36,8 @@ import { PaginatorComponent } from '../../../shared/components/paginator/paginat
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    PaginatorComponent
+    PaginatorComponent,
+    MatDialogModule
   ],
   templateUrl: './product-list.html',
   styleUrl: './product-list.scss'
@@ -44,6 +47,7 @@ export class ProductListComponent implements OnInit {
   private categoryService = inject(CategoryService);
   private brandService = inject(BrandService);
   private notification = inject(NotificationService);
+  private dialog = inject(MatDialog);
 
   products = signal<Product[]>([]);
   categories = signal<Category[]>([]);
@@ -143,32 +147,48 @@ export class ProductListComponent implements OnInit {
   }
 
   deactivate(id: string): void {
-    this.productService.deactivate(id).subscribe({
-      next: (response) => {
-        if (response.isSuccess) {
-          this.notification.success('Producto desactivado correctamente');
-          this.loadProducts();
-        } else {
-          this.notification.error(response.message);
-        }
-      },
-      error: () => {
-        this.notification.error('Error al desactivar el producto');
-      }
-    });
+  const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+    width: '400px',
+    data: { message: '¿Estás seguro de desactivar este producto?' }
+  });
+
+  dialogRef.afterClosed().subscribe(confirmed => {
+    if (confirmed) {
+      this.productService.deactivate(id).subscribe({
+        next: (response) => {
+          if (response.isSuccess) {
+            this.notification.success('Producto desactivado correctamente');
+            this.loadProducts();
+          } else {
+            this.notification.error(response.message);
+          }
+        },
+        error: () => this.notification.error('Error al desactivar el producto')
+      });
+    }
+  });
   }
 
   activate(id: string): void {
-  this.productService.activate(id).subscribe({
-    next: (response) => {
-      if (response.isSuccess) {
-        this.notification.success('Producto activado correctamente');
-        this.loadProducts();
-      } else {
-        this.notification.error(response.message);
-      }
-    },
-    error: () => this.notification.error('Error al activar el producto')
+  const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+    width: '400px',
+    data: { message: '¿Estás seguro de activar este producto?' }
+  });
+
+  dialogRef.afterClosed().subscribe(confirmed => {
+    if (confirmed) {
+      this.productService.activate(id).subscribe({
+        next: (response) => {
+          if (response.isSuccess) {
+            this.notification.success('Producto activado correctamente');
+            this.loadProducts();
+          } else {
+            this.notification.error(response.message);
+          }
+        },
+        error: () => this.notification.error('Error al activar el producto')
+      });
+    }
   });
   }
 }

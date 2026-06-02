@@ -4,6 +4,7 @@ using PatriSystem.DataAccess.Repositories;
 using PatriSystem.Domain.Interfaces.Repositories;
 using PatriSystem.Domain.Interfaces.Services;
 using PatriSystem.Domain.Services;
+using PatriSystem.API.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,6 +54,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowAngular");
 app.UseAuthorization();
+app.UseMiddleware<ExceptionMiddleware>();
 app.MapControllers();
 
 app.Run();

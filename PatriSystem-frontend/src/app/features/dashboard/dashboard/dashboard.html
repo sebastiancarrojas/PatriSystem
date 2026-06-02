@@ -1,0 +1,100 @@
+<div class="container">
+  <div class="header">
+    <div>
+      <h2>Dashboard</h2>
+      <span class="subtitle">Resumen de tu comercio</span>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="spinner-container">
+      <mat-spinner></mat-spinner>
+    </div>
+  } @else if (dashboard()) {
+
+    <div class="quick-actions">
+      <button mat-stroked-button routerLink="/sales/create">
+        <mat-icon>shopping_cart</mat-icon>
+        Nueva Venta
+      </button>
+      <button mat-stroked-button routerLink="/products/create">
+        <mat-icon>add</mat-icon>
+        Nuevo Producto
+      </button>
+    </div>
+
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-info">
+          <span class="card-label">Total Productos</span>
+          <span class="card-value">{{ dashboard()!.totalProducts }}</span>
+        </div>
+        <div class="card-icon purple"><mat-icon>inventory_2</mat-icon></div>
+      </div>
+      <div class="card">
+        <div class="card-info">
+          <span class="card-label">Ventas Hoy</span>
+          <span class="card-value">{{ dashboard()!.salesTodayAmount | currency:'COP':'$':'1.0-0' }}</span>
+          <span class="card-sub">{{ dashboard()!.salesTodayCount }} ventas</span>
+        </div>
+        <div class="card-icon green"><mat-icon>attach_money</mat-icon></div>
+      </div>
+      <div class="card">
+        <div class="card-info">
+          <span class="card-label">Ventas Semana</span>
+          <span class="card-value">{{ dashboard()!.salesWeekAmount | currency:'COP':'$':'1.0-0' }}</span>
+          <span class="card-sub">{{ dashboard()!.salesWeekCount }} ventas</span>
+        </div>
+        <div class="card-icon blue"><mat-icon>trending_up</mat-icon></div>
+      </div>
+      <div class="card">
+        <div class="card-info">
+          <span class="card-label">Ventas Mes</span>
+          <span class="card-value">{{ dashboard()!.salesMonthAmount | currency:'COP':'$':'1.0-0' }}</span>
+          <span class="card-sub">{{ dashboard()!.salesMonthCount }} ventas</span>
+        </div>
+        <div class="card-icon orange"><mat-icon>calendar_month</mat-icon></div>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h3>Ventas (Últimos 7 días)</h3>
+        <canvas baseChart
+          [data]="chartData"
+          [options]="chartOptions"
+          type="line">
+        </canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Productos Más Vendidos (Este mes)</h3>
+        @if (dashboard()!.topProducts.length === 0) {
+          <div class="empty-state">
+            <mat-icon>bar_chart</mat-icon>
+            <p>Sin datos este mes</p>
+          </div>
+        } @else {
+          <table class="top-table">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Ingresos</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (p of dashboard()!.topProducts; track p.productName; let i = $index) {
+                <tr>
+                  <td><span class="rank">#{{ i + 1 }}</span> {{ p.productName }}</td>
+                  <td>{{ p.quantity }}</td>
+                  <td class="revenue">{{ p.revenue | currency:'COP':'$':'1.0-0' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    </div>
+
+  }
+</div>

@@ -1,0 +1,74 @@
+<div class="container">
+  <div class="header">
+    <h2>Dashboard</h2>
+  </div>
+
+  @if (loading()) {
+    <div class="spinner-container">
+      <mat-spinner></mat-spinner>
+    </div>
+  } @else if (dashboard()) {
+
+    <div class="section-title">Hoy</div>
+    <div class="cards-grid two">
+      <div class="card">
+        <div class="card-icon green"><mat-icon>shopping_cart</mat-icon></div>
+        <div class="card-info">
+          <span class="card-label">Ventas hoy</span>
+          <span class="card-value">{{ dashboard()!.salesToday }}</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-icon blue"><mat-icon>payments</mat-icon></div>
+        <div class="card-info">
+          <span class="card-label">Ingresos hoy</span>
+          <span class="card-value">{{ dashboard()!.totalToday | currency:'COP':'symbol':'1.0-0' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Productos</div>
+    <div class="cards-grid three">
+      <div class="card">
+        <div class="card-icon purple"><mat-icon>inventory_2</mat-icon></div>
+        <div class="card-info">
+          <span class="card-label">Total productos</span>
+          <span class="card-value">{{ dashboard()!.totalProducts }}</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-icon green"><mat-icon>check_circle</mat-icon></div>
+        <div class="card-info">
+          <span class="card-label">Activos</span>
+          <span class="card-value">{{ dashboard()!.activeProducts }}</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-icon red"><mat-icon>cancel</mat-icon></div>
+        <div class="card-info">
+          <span class="card-label">Inactivos</span>
+          <span class="card-value">{{ dashboard()!.inactiveProducts }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Histórico</div>
+    <div class="cards-grid two">
+      <div class="card">
+        <div class="card-icon blue"><mat-icon>receipt_long</mat-icon></div>
+        <div class="card-info">
+          <span class="card-label">Total ventas</span>
+          <span class="card-value">{{ dashboard()!.totalSales }}</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-icon purple"><mat-icon>attach_money</mat-icon></div>
+        <div class="card-info">
+          <span class="card-label">Ingresos totales</span>
+          <span class="card-value small">{{ dashboard()!.totalRevenue | currency:'COP':'symbol':'1.0-0' }}</span>
+        </div>
+      </div>
+    </div>
+
+  }
+</div>

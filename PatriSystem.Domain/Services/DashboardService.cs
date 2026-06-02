@@ -17,22 +17,27 @@ namespace PatriSystem.Domain.Services
         {
             try
             {
-                var salesToday = await _dashboardRepository.GetSalesTodayAsync();
-                var totalToday = await _dashboardRepository.GetTotalTodayAsync();
+                var salesTodayCount = await _dashboardRepository.GetSalesTodayCountAsync();
+                var salesTodayAmount = await _dashboardRepository.GetSalesTodayAmountAsync();
+                var salesWeekCount = await _dashboardRepository.GetSalesWeekCountAsync();
+                var salesWeekAmount = await _dashboardRepository.GetSalesWeekAmountAsync();
+                var salesMonthCount = await _dashboardRepository.GetSalesMonthCountAsync();
+                var salesMonthAmount = await _dashboardRepository.GetSalesMonthAmountAsync();
                 var totalProducts = await _dashboardRepository.GetTotalProductsAsync();
-                var activeProducts = await _dashboardRepository.GetActiveProductsAsync();
-                var totalSales = await _dashboardRepository.GetTotalSalesAsync();
-                var totalRevenue = await _dashboardRepository.GetTotalRevenueAsync();
+                var last7DaysSales = await _dashboardRepository.GetLast7DaysSalesAsync();
+                var topProducts = await _dashboardRepository.GetTopProductsLastMonthAsync();
 
                 var dashboard = new
                 {
-                    salesToday,
-                    totalToday,
+                    salesTodayCount,
+                    salesTodayAmount,
+                    salesWeekCount,
+                    salesWeekAmount,
+                    salesMonthCount,
+                    salesMonthAmount,
                     totalProducts,
-                    activeProducts,
-                    inactiveProducts = totalProducts - activeProducts,
-                    totalSales,
-                    totalRevenue
+                    last7DaysSales,
+                    topProducts
                 };
 
                 return Response<object>.Success(dashboard);

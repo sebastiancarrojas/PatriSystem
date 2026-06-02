@@ -117,5 +117,14 @@ namespace PatriSystem.API.Controllers
             var dto = _mapper.Map<List<ProductSearchDto>>(response.Result);
             return Ok(dto);
         }
+
+        [HttpPatch("{id}/activate")]
+        public async Task<IActionResult> Activate(Guid id)
+        {
+            var response = await _productService.ActivateAsync(id);
+            if (!response.IsSuccess)
+                return BadRequest(response);
+            return Ok(response);
+        }
     }
 }

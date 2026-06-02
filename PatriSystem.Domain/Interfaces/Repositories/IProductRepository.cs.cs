@@ -13,5 +13,6 @@ namespace PatriSystem.Domain.Interfaces.Repositories
         Task DeactivateAsync(Guid id);
         Task<PaginationResponse<Product>> GetPaginatedAsync(ProductPaginationRequest request);
         Task<List<Product>> SearchForSaleAsync(string term);
+        Task ActivateAsync(Guid id);
     }
 }

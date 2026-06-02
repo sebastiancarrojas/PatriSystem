@@ -138,5 +138,22 @@ namespace PatriSystem.Domain.Services
                 return Response<List<Product>>.Failure(ex, "Error al buscar productos");
             }
         }
+
+        public async Task<Response<object>> ActivateAsync(Guid id)
+        {
+            try
+            {
+                var existing = await _productRepository.GetByIdAsync(id);
+                if (existing == null)
+                    return Response<object>.Failure("Producto no encontrado");
+
+                await _productRepository.ActivateAsync(id);
+                return Response<object>.Success("Producto activado correctamente");
+            }
+            catch (Exception ex)
+            {
+                return Response<object>.Failure(ex, "Error al activar el producto");
+            }
+        }
     }
 }

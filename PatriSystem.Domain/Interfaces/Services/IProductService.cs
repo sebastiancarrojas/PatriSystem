@@ -13,5 +13,6 @@ namespace PatriSystem.Domain.Interfaces.Services
         Task<Response<Product>> GetByIdAsync(Guid id);
         Task<Response<PaginationResponse<Product>>> GetPaginatedAsync(ProductPaginationRequest request);
         Task<Response<List<Product>>> SearchForSaleAsync(string term);
+        Task<Response<object>> ActivateAsync(Guid id);
     }
 }

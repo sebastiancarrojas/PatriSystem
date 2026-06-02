@@ -116,6 +116,16 @@ namespace PatriSystem.DataAccess.Repositories
                 .ToListAsync();
         }
 
+        public async Task ActivateAsync(Guid id)
+        {
+            var product = await _context.Products.FindAsync(id);
+            if (product != null)
+            {
+                product.Status = true;
+                product.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }
     

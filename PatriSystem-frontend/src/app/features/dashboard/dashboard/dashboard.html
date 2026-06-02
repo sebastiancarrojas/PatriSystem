@@ -68,7 +68,7 @@
       </div>
       <div class="chart-card">
         <h3>Productos Más Vendidos (Este mes)</h3>
-        @if (dashboard()!.topProducts.length === 0) {
+        @if (dashboard()!.topProductsLastMonth.length === 0) {
           <div class="empty-state">
             <mat-icon>bar_chart</mat-icon>
             <p>Sin datos este mes</p>
@@ -83,7 +83,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (p of dashboard()!.topProducts; track p.productName; let i = $index) {
+              @for (p of dashboard()!.topProductsLastMonth; track p.productName; let i = $index) {
                 <tr>
                   <td><span class="rank">#{{ i + 1 }}</span> {{ p.productName }}</td>
                   <td>{{ p.quantity }}</td>

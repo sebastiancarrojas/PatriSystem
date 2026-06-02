@@ -1,6 +1,6 @@
 <div class="container">
   <div class="header">
-    <button mat-icon-button routerLink="/sales">
+    <button mat-icon-button (click)="goBack()">
       <mat-icon>arrow_back</mat-icon>
     </button>
     <h2>Nueva Venta</h2>
@@ -99,7 +99,7 @@
       </div>
 
       <div class="actions">
-        <button mat-button routerLink="/sales">Cancelar</button>
+        <button mat-button (click)="goBack()">Cancelar</button>
         <button mat-raised-button color="primary" (click)="submit()" [disabled]="loading()">
           @if (loading()) {
             <mat-spinner diameter="20"></mat-spinner>

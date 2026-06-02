@@ -134,13 +134,14 @@ openBrandDialog(): void {
 
     this.loading.set(true);
     const value = this.form.value;
+     const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/products';
 
     if (this.isEdit() && this.productId()) {
       this.productService.update(this.productId()!, value).subscribe({
         next: (response) => {
           if (response.isSuccess) {
             this.notification.success('Producto actualizado correctamente');
-            this.router.navigate(['/products']);
+            this.router.navigate([returnUrl]);
           } else {
             this.notification.error(response.message);
           }
@@ -156,7 +157,7 @@ openBrandDialog(): void {
         next: (response) => {
           if (response.isSuccess) {
             this.notification.success('Producto creado correctamente');
-            this.router.navigate(['/products']);
+            this.router.navigate([returnUrl]);
           } else {
             this.notification.error(response.message);
           }
@@ -168,5 +169,10 @@ openBrandDialog(): void {
         }
       });
     }
+  }
+
+  goBack(): void {
+  const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/products';
+  this.router.navigate([returnUrl]);
   }
 }

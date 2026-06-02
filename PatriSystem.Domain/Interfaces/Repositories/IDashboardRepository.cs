@@ -1,4 +1,6 @@
-﻿namespace PatriSystem.Domain.Interfaces.Repositories
+﻿using PatriSystem.Domain.DTOs.Dashboard;
+
+namespace PatriSystem.Domain.Interfaces.Repositories
 {
     public interface IDashboardRepository
     {
@@ -9,7 +11,7 @@
         Task<int> GetSalesMonthCountAsync();
         Task<decimal> GetSalesMonthAmountAsync();
         Task<int> GetTotalProductsAsync();
-        Task<IEnumerable<object>> GetLast7DaysSalesAsync();
-        Task<IEnumerable<object>> GetTopProductsLastMonthAsync();
+        Task<IEnumerable<DailySalesResponseDto>> GetLast7DaysSalesAsync();
+        Task<IEnumerable<TopProductResponseDto>> GetTopProductsLastMonthAsync();
     }
 }

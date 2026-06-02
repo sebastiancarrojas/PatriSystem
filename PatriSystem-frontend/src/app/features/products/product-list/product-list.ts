@@ -157,4 +157,18 @@ export class ProductListComponent implements OnInit {
       }
     });
   }
+
+  activate(id: string): void {
+  this.productService.activate(id).subscribe({
+    next: (response) => {
+      if (response.isSuccess) {
+        this.notification.success('Producto activado correctamente');
+        this.loadProducts();
+      } else {
+        this.notification.error(response.message);
+      }
+    },
+    error: () => this.notification.error('Error al activar el producto')
+  });
+  }
 }

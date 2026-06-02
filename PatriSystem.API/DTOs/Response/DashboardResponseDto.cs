@@ -1,13 +1,15 @@
 ﻿namespace PatriSystem.API.DTOs.Response
 {
-    public class DashboardResponseDto
+    public class DashboardResponse
     {
-        public int SalesToday { get; set; }
-        public decimal TotalToday { get; set; }
+        public int SalesTodayCount { get; set; }
+        public decimal SalesTodayAmount { get; set; }
+        public int SalesWeekCount { get; set; }
+        public decimal SalesWeekAmount { get; set; }
+        public int SalesMonthCount { get; set; }
+        public decimal SalesMonthAmount { get; set; }
         public int TotalProducts { get; set; }
-        public int ActiveProducts { get; set; }
-        public int InactiveProducts { get; set; }
-        public int TotalSales { get; set; }
-        public decimal TotalRevenue { get; set; }
+        public IEnumerable<DailySalesResponseDto> Last7DaysSales { get; set; } = new List<DailySalesResponseDto>();
+        public IEnumerable<TopProductResponseDto> TopProductsLastMonth { get; set; } = new List<TopProductResponseDto>();
     }
 }

@@ -1,4 +1,5 @@
 ﻿using PatriSystem.Domain.Common;
+using PatriSystem.Domain.DTOs.Dashboard;
 using PatriSystem.Domain.Interfaces.Repositories;
 using PatriSystem.Domain.Interfaces.Services;
 
@@ -13,38 +14,28 @@ namespace PatriSystem.Domain.Services
             _dashboardRepository = dashboardRepository;
         }
 
-        public async Task<Response<object>> GetDashboardAsync()
+        public async Task<Response<DashboardResponse>> GetDashboardAsync()
         {
             try
             {
-                var salesTodayCount = await _dashboardRepository.GetSalesTodayCountAsync();
-                var salesTodayAmount = await _dashboardRepository.GetSalesTodayAmountAsync();
-                var salesWeekCount = await _dashboardRepository.GetSalesWeekCountAsync();
-                var salesWeekAmount = await _dashboardRepository.GetSalesWeekAmountAsync();
-                var salesMonthCount = await _dashboardRepository.GetSalesMonthCountAsync();
-                var salesMonthAmount = await _dashboardRepository.GetSalesMonthAmountAsync();
-                var totalProducts = await _dashboardRepository.GetTotalProductsAsync();
-                var last7DaysSales = await _dashboardRepository.GetLast7DaysSalesAsync();
-                var topProducts = await _dashboardRepository.GetTopProductsLastMonthAsync();
-
-                var dashboard = new
+                var dashboard = new DashboardResponse
                 {
-                    salesTodayCount,
-                    salesTodayAmount,
-                    salesWeekCount,
-                    salesWeekAmount,
-                    salesMonthCount,
-                    salesMonthAmount,
-                    totalProducts,
-                    last7DaysSales,
-                    topProducts
+                    SalesTodayCount = await _dashboardRepository.GetSalesTodayCountAsync(),
+                    SalesTodayAmount = await _dashboardRepository.GetSalesTodayAmountAsync(),
+                    SalesWeekCount = await _dashboardRepository.GetSalesWeekCountAsync(),
+                    SalesWeekAmount = await _dashboardRepository.GetSalesWeekAmountAsync(),
+                    SalesMonthCount = await _dashboardRepository.GetSalesMonthCountAsync(),
+                    SalesMonthAmount = await _dashboardRepository.GetSalesMonthAmountAsync(),
+                    TotalProducts = await _dashboardRepository.GetTotalProductsAsync(),
+                    Last7DaysSales = await _dashboardRepository.GetLast7DaysSalesAsync(),
+                    TopProductsLastMonth = await _dashboardRepository.GetTopProductsLastMonthAsync()
                 };
 
-                return Response<object>.Success(dashboard);
+                return Response<DashboardResponse>.Success(dashboard);
             }
             catch (Exception ex)
             {
-                return Response<object>.Failure(ex, "Error al obtener el dashboard");
+                return Response<DashboardResponse>.Failure(ex, "Error al obtener el dashboard");
             }
         }
     }

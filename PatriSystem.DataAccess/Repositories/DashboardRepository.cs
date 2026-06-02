@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PatriSystem.DataAccess.Context;
+using PatriSystem.Domain.DTOs.Dashboard;
 using PatriSystem.Domain.Interfaces.Repositories;
 
 namespace PatriSystem.DataAccess.Repositories
@@ -58,37 +59,35 @@ namespace PatriSystem.DataAccess.Repositories
         public async Task<int> GetTotalProductsAsync()
             => await _context.Products.CountAsync();
 
-        public async Task<IEnumerable<object>> GetLast7DaysSalesAsync()
+        public async Task<IEnumerable<DailySalesResponseDto>> GetLast7DaysSalesAsync()
         {
             var weekStart = DateTime.UtcNow.Date.AddDays(-6);
             return await _context.Sales
                 .Where(s => s.SaleDate.Date >= weekStart)
                 .GroupBy(s => s.SaleDate.Date)
-                .Select(g => new
+                .Select(g => new DailySalesResponseDto
                 {
-                    date = g.Key,
-                    amount = g.Sum(s => s.TotalAmount)
+                    Date = g.Key,
+                    Amount = g.Sum(s => s.TotalAmount)
                 })
-                .OrderBy(x => x.date)
-                .Cast<object>()
+                .OrderBy(x => x.Date)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<object>> GetTopProductsLastMonthAsync()
+        public async Task<IEnumerable<TopProductResponseDto>> GetTopProductsLastMonthAsync()
         {
             var monthStart = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
             return await _context.SaleDetails
                 .Where(sd => sd.Sale.SaleDate.Date >= monthStart && sd.ProductName != null)
                 .GroupBy(sd => sd.ProductName)
-                .Select(g => new
+                .Select(g => new TopProductResponseDto
                 {
-                    productName = g.Key,
-                    quantity = g.Sum(sd => sd.Quantity),
-                    revenue = g.Sum(sd => sd.SubTotal)
+                    ProductName = g.Key!,
+                    Quantity = g.Sum(sd => sd.Quantity),
+                    Revenue = g.Sum(sd => sd.SubTotal)
                 })
-                .OrderByDescending(x => x.quantity)
+                .OrderByDescending(x => x.Quantity)
                 .Take(5)
-                .Cast<object>()
                 .ToListAsync();
         }
     }

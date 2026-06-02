@@ -1,4 +1,4 @@
-﻿namespace PatriSystem.API.DTOs.Response
+﻿namespace PatriSystem.Domain.DTOs.Dashboard
 {
     public class DailySalesResponseDto
     {

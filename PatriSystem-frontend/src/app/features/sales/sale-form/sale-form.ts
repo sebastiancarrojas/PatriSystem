@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormControl, Validators } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
 import { SaleService } from '../../../core/services/sale.service';
@@ -46,6 +46,7 @@ export class SaleFormComponent {
   private router = inject(Router);
   private fb = inject(FormBuilder);
   private dialog = inject(MatDialog);
+  private route = inject(ActivatedRoute);
 
   searchResults = signal<ProductSearch[]>([]);
   details = signal<(CreateSaleDetailRequest & { productName: string; subTotal: number })[]>([]);
@@ -146,6 +147,7 @@ export class SaleFormComponent {
 
 registerSale(): void {
   this.loading.set(true);
+  const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/sales';
   const sale = {
     details: this.details().map(d => {
       const isTemp = d.productId != null && d.productId.startsWith('temp-');
@@ -163,7 +165,7 @@ registerSale(): void {
     next: (response) => {
       if (response.isSuccess) {
         this.notification.success('Venta registrada correctamente');
-        this.router.navigate(['/sales']);
+        this.router.navigate([returnUrl]);
       } else {
         this.notification.error(response.message);
       }
@@ -224,5 +226,10 @@ registerSale(): void {
       }]);
     }
   });
+  }
+
+  goBack(): void {
+  const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/sales';
+  this.router.navigate([returnUrl]);
   }
 }

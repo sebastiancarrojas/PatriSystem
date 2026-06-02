@@ -18,5 +18,5 @@ export interface Dashboard {
   salesMonthAmount: number;
   totalProducts: number;
   last7DaysSales: DailySales[];
-  topProducts: TopProduct[];
+  topProductsLastMonth: TopProduct[];
 }

@@ -21,7 +21,6 @@ namespace PatriSystem.DataAccess.Repositories
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                // Asignar número de venta correlativo
                 var lastSaleNumber = await _context.Sales
                     .OrderByDescending(s => s.SaleNumber)
                     .Select(s => s.SaleNumber)
@@ -34,6 +33,7 @@ namespace PatriSystem.DataAccess.Repositories
                     var product = products.FirstOrDefault(p => p.Id == detail.ProductId);
                     if (product != null)
                         product.CurrentStock -= detail.Quantity;
+                        detail.ProductName = product.ProductName;
                 }
 
                 await _context.Sales.AddAsync(sale);

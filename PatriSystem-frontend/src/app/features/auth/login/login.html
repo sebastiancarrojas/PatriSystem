@@ -1,0 +1,44 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <h1>PatriSystem</h1>
+      <p>Inicia sesión para continuar</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <mat-form-field appearance="outline">
+        <mat-label>Correo electrónico</mat-label>
+        <input matInput formControlName="email" type="email" placeholder="admin@patrisystem.com" />
+        <mat-icon matSuffix>email</mat-icon>
+        @if (form.get('email')?.hasError('required')) {
+          <mat-error>El correo es requerido</mat-error>
+        }
+        @if (form.get('email')?.hasError('email')) {
+          <mat-error>Correo inválido</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Contraseña</mat-label>
+        <input matInput formControlName="password" [type]="hidePassword() ? 'password' : 'text'" />
+        <button mat-icon-button matSuffix type="button" (click)="hidePassword.set(!hidePassword())">
+          <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        @if (form.get('password')?.hasError('required')) {
+          <mat-error>La contraseña es requerida</mat-error>
+        }
+        @if (form.get('password')?.hasError('minlength')) {
+          <mat-error>Mínimo 8 caracteres</mat-error>
+        }
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || loading()">
+        @if (loading()) {
+          <mat-spinner diameter="20"></mat-spinner>
+        } @else {
+          Iniciar sesión
+        }
+      </button>
+    </form>
+  </div>
+</div>

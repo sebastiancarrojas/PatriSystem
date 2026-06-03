@@ -1,5 +1,7 @@
 .container {
   padding: 24px;
+  background: var(--color-background);
+  min-height: 100vh;
 }
 
 .header {
@@ -10,7 +12,33 @@
 
   h2 {
     margin: 0;
-    font-size: 24px;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+  }
+
+  .btn-new {
+    height: 40px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: Roboto, sans-serif;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+
+    &:hover { opacity: 0.85; }
   }
 }
 
@@ -19,9 +47,52 @@
   align-items: center;
   gap: 16px;
   margin-bottom: 24px;
+  background: var(--color-surface);
+  padding: 16px;
+  border-radius: 12px;
+  border: 0.5px solid var(--color-border);
 
   mat-form-field {
     flex: 1;
+    margin: 0;
+  }
+
+  .btn-save {
+    height: 56px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: Roboto, sans-serif;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0 16px;
+    cursor: pointer;
+    white-space: nowrap;
+    margin-bottom: 4px;
+
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+    &:hover:not(:disabled) { opacity: 0.85; }
+  }
+
+  .btn-cancel {
+    height: 56px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: Roboto, sans-serif;
+    background: transparent;
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 0 16px;
+    cursor: pointer;
+    white-space: nowrap;
+    margin-bottom: 4px;
+
+    &:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
   }
 }
 
@@ -38,6 +109,14 @@
 
 table {
   width: 100%;
+  background: var(--color-surface);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 0.5px solid var(--color-border);
+}
+
+.mat-elevation-z2 {
+  box-shadow: none !important;
 }
 
 .empty-state {
@@ -45,7 +124,10 @@ table {
   flex-direction: column;
   align-items: center;
   padding: 48px;
-  color: #9e9e9e;
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border-radius: 12px;
+  border: 0.5px solid var(--color-border);
 
   mat-icon {
     font-size: 48px;

@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, ActivatedRoute } from '@angular/router';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { SaleService } from '../../../core/services/sale.service';
 import { NotificationService } from '../../../core/services/notification.service';
 import { Sale } from '../../../core/models/sale.model';
@@ -29,6 +29,7 @@ export class SaleDetailComponent implements OnInit {
   private saleService = inject(SaleService);
   private notification = inject(NotificationService);
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
 
   sale = signal<Sale | null>(null);
   loading = signal(false);
@@ -51,5 +52,10 @@ export class SaleDetailComponent implements OnInit {
         this.loading.set(false);
       }
     });
+  }
+
+  goBack(): void {
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/sales';
+    this.router.navigate([returnUrl]);
   }
 }

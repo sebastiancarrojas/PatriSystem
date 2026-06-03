@@ -3,7 +3,7 @@
 <mat-dialog-content>
   <p>Agrega un producto que no está en el inventario.</p>
   <form [formGroup]="form">
-    <mat-form-field appearance="outline" class="full-width">
+    <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
       <mat-label>Nombre del producto</mat-label>
       <input matInput formControlName="productName" />
       @if (form.get('productName')?.hasError('required')) {
@@ -11,7 +11,7 @@
       }
     </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full-width">
+    <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
       <mat-label>Precio</mat-label>
       <input matInput type="number" formControlName="unitPrice" min="0.01" />
       @if (form.get('unitPrice')?.hasError('required')) {
@@ -25,8 +25,8 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button (click)="cancel()">Cancelar</button>
-  <button mat-raised-button color="primary" (click)="submit()" [disabled]="form.invalid">
+  <button class="btn-cancel" (click)="cancel()">Cancelar</button>
+  <button class="btn-submit" (click)="submit()" [disabled]="form.invalid">
     Agregar
   </button>
 </mat-dialog-actions>

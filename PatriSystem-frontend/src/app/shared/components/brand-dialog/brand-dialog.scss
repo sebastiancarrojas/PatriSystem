@@ -1,6 +1,6 @@
 .full-width {
   width: 100%;
-  min-width: 300px;
+  min-width: 0;
 }
 
 mat-dialog-content {
@@ -8,4 +8,45 @@ mat-dialog-content {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  overflow: visible;
+}
+
+mat-dialog-actions {
+  gap: 8px;
+  padding: 8px 16px 16px;
+  justify-content: flex-end;
+}
+
+.btn-cancel {
+  height: 36px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: Roboto, sans-serif;
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 0 16px;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+}
+
+.btn-submit {
+  height: 36px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: Roboto, sans-serif;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0 16px;
+  cursor: pointer;
+
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+  &:hover:not(:disabled) { opacity: 0.85; }
 }

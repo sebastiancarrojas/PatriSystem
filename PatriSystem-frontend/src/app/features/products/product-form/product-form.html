@@ -1,6 +1,6 @@
 <div class="container">
   <div class="header">
-    <button mat-icon-button (click)="goBack()">
+    <button class="btn-back" type="button" (click)="goBack()">
       <mat-icon>arrow_back</mat-icon>
     </button>
     <h2>{{ isEdit() ? 'Editar Producto' : 'Nuevo Producto' }}</h2>
@@ -31,7 +31,7 @@
       </mat-form-field>
 
       <div class="field-with-action">
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Categoría</mat-label>
           <mat-select formControlName="categoryId">
             @for (category of categories(); track category.id) {
@@ -42,13 +42,13 @@
             <mat-error>La categoría es requerida</mat-error>
           }
         </mat-form-field>
-        <button mat-icon-button color="primary" type="button" (click)="openCategoryDialog()">
+        <button class="btn-add-inline" type="button" (click)="openCategoryDialog()">
           <mat-icon>add_circle</mat-icon>
         </button>
       </div>
 
       <div class="field-with-action">
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Marca</mat-label>
           <mat-select formControlName="brandId">
             @for (brand of brands(); track brand.id) {
@@ -59,7 +59,7 @@
             <mat-error>La marca es requerida</mat-error>
           }
         </mat-form-field>
-        <button mat-icon-button color="primary" type="button" (click)="openBrandDialog()">
+        <button class="btn-add-inline" type="button" (click)="openBrandDialog()">
           <mat-icon>add_circle</mat-icon>
         </button>
       </div>
@@ -81,8 +81,8 @@
       </mat-form-field>
 
       <div class="actions">
-        <button mat-button type="button" (click)="goBack()">Cancelar</button>
-        <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
+        <button class="btn-cancel" type="button" (click)="goBack()">Cancelar</button>
+        <button class="btn-submit" type="submit" [disabled]="form.invalid">
           {{ isEdit() ? 'Actualizar' : 'Crear' }}
         </button>
       </div>

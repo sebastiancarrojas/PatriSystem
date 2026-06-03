@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PatriSystem.API.DTOs.Request;
 using PatriSystem.API.DTOs.Response;

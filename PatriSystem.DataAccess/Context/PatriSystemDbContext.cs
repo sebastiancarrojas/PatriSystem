@@ -1,9 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using PatriSystem.Domain.Entities;
 
 namespace PatriSystem.DataAccess.Context
 {
-    public class PatriSystemDbContext : DbContext
+    public class PatriSystemDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
     {
         public PatriSystemDbContext(DbContextOptions<PatriSystemDbContext> options) : base(options)
         {

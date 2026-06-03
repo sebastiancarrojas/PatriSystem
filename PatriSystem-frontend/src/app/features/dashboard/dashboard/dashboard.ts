@@ -72,10 +72,10 @@ export class DashboardComponent implements OnInit {
       ),
       datasets: [{
         data: data.last7DaysSales.map(d => d.amount),
-        borderColor: '#1976d2',
-        backgroundColor: 'rgba(25,118,210,0.08)',
+        borderColor: '#374151',
+        backgroundColor: 'rgba(55, 65, 81, 0.06)',
         borderWidth: 2,
-        pointBackgroundColor: '#1976d2',
+        pointBackgroundColor: '#374151',
         pointRadius: 4,
         fill: true,
         tension: 0.4

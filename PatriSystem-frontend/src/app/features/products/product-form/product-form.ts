@@ -103,7 +103,7 @@ export class ProductFormComponent implements OnInit {
     });
   }
 
-  openCategoryDialog(): void {
+openCategoryDialog(): void {
   const dialogRef = this.dialog.open(CategoryDialogComponent, {
     width: '400px'
   });

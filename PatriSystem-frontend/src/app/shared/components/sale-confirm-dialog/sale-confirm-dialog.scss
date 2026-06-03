@@ -3,8 +3,9 @@ mat-dialog-content {
 }
 
 .summary {
-  background-color: #f5f5f5;
+  background: var(--color-background);
   border-radius: 8px;
+  border: 0.5px solid var(--color-border);
   padding: 16px;
   margin-top: 16px;
   display: flex;
@@ -16,10 +17,51 @@ mat-dialog-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 16px;
+  font-size: 14px;
+  color: var(--color-text-secondary);
 
   strong {
-    font-size: 18px;
-    color: #1976d2;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--color-icon-green);
   }
+}
+
+.btn-cancel {
+  height: 36px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: Roboto, sans-serif;
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 0 16px;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+  }
+}
+
+.btn-confirm {
+  height: 36px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: Roboto, sans-serif;
+  background: var(--color-success);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0 16px;
+  cursor: pointer;
+
+  &:hover { opacity: 0.85; }
+}
+
+mat-dialog-actions {
+  gap: 8px;
+  padding: 8px 16px 16px;
+  justify-content: flex-end;
 }

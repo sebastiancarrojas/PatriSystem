@@ -1,7 +1,7 @@
 <div class="container">
   <div class="header">
     <h2>Categorías</h2>
-    <button mat-raised-button color="primary" (click)="openCreate()">
+    <button class="btn-new" (click)="openCreate()">
       <mat-icon>add</mat-icon>
       Nueva Categoría
     </button>
@@ -9,21 +9,21 @@
 
   @if (showForm()) {
     <form [formGroup]="form" (ngSubmit)="submit()" class="form-inline">
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
         <mat-label>Nombre de la categoría</mat-label>
         <input matInput formControlName="categoryName" />
         @if (form.get('categoryName')?.hasError('required')) {
           <mat-error>El nombre es requerido</mat-error>
         }
       </mat-form-field>
-      <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
+      <button class="btn-save" type="submit" [disabled]="form.invalid">
         {{ editingCategory() ? 'Actualizar' : 'Guardar' }}
       </button>
-      <button mat-button type="button" (click)="cancel()">Cancelar</button>
+      <button class="btn-cancel" type="button" (click)="cancel()">Cancelar</button>
     </form>
   }
 
-  <mat-form-field appearance="outline" class="search-field">
+  <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
     <mat-label>Buscar categoría</mat-label>
     <input matInput [formControl]="searchControl" />
     <mat-icon matSuffix>search</mat-icon>

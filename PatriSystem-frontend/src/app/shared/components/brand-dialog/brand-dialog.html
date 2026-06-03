@@ -18,8 +18,8 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button (click)="cancel()">Cancelar</button>
-  <button mat-raised-button color="primary" (click)="submit()" [disabled]="form.invalid">
+  <button class="btn-cancel" (click)="cancel()">Cancelar</button>
+  <button class="btn-submit" (click)="submit()" [disabled]="form.invalid">
     Guardar
   </button>
 </mat-dialog-actions>

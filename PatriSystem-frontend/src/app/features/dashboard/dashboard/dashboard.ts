@@ -1,5 +1,5 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, OnInit, signal, NgZone, OnDestroy } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -9,7 +9,6 @@ import { Chart, ChartData, ChartOptions, registerables } from 'chart.js';
 import { DashboardService } from '../../../core/services/dashboard.service';
 import { Dashboard } from '../../../core/models/dashboard.model';
 import { NotificationService } from '../../../core/services/notification.service';
-
 
 Chart.register(...registerables);
 
@@ -23,17 +22,22 @@ Chart.register(...registerables);
     MatButtonModule,
     MatProgressSpinnerModule,
     BaseChartDirective,
+    DatePipe
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   private dashboardService = inject(DashboardService);
   private notification = inject(NotificationService);
   private router = inject(Router);
+  private zone = inject(NgZone);
 
   dashboard = signal<Dashboard | null>(null);
-  loading = signal(false);
+  loading = signal(true);
+  currentTime = signal<string>('');
+  today = new Date();
+  private timer: any;
 
   chartData: ChartData<'line'> = { labels: [], datasets: [] };
   chartOptions: ChartOptions<'line'> = {
@@ -51,6 +55,13 @@ export class DashboardComponent implements OnInit {
   };
 
   ngOnInit(): void {
+    this.updateTime();
+    this.zone.runOutsideAngular(() => {
+      this.timer = setInterval(() => {
+        this.zone.run(() => this.updateTime());
+      }, 1000);
+    });
+
     this.loading.set(true);
     this.dashboardService.get().subscribe({
       next: (data) => {
@@ -65,10 +76,24 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  ngOnDestroy(): void {
+    clearInterval(this.timer);
+  }
+
+  updateTime(): void {
+    const now = new Date();
+    this.currentTime.set(now.toLocaleTimeString('es-CO', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    }));
+  }
+
   buildChart(data: Dashboard): void {
-    this.chartData = {
-      labels: data.last7DaysSales.map(d =>
-        new Date(d.date).toLocaleDateString('es-CO', { day: '2-digit', month: 'short' })
+  this.chartData = {
+    labels: data.last7DaysSales.map(d =>
+      new Date(d.date).toLocaleDateString('es-CO', { day: '2-digit', month: 'short' })
       ),
       datasets: [{
         data: data.last7DaysSales.map(d => d.amount),
@@ -84,10 +109,10 @@ export class DashboardComponent implements OnInit {
   }
 
   goToNewSale(): void {
-  this.router.navigate(['/sales/create'], { queryParams: { returnUrl: '/dashboard' } });
+    this.router.navigate(['/sales/create'], { queryParams: { returnUrl: '/dashboard' } });
   }
 
-goToNewProduct(): void {
-  this.router.navigate(['/products/create'], { queryParams: { returnUrl: '/dashboard' } });
+  goToNewProduct(): void {
+    this.router.navigate(['/products/create'], { queryParams: { returnUrl: '/dashboard' } });
   }
 }

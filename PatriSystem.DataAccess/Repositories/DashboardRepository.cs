@@ -14,45 +14,51 @@ namespace PatriSystem.DataAccess.Repositories
             _context = context;
         }
 
+        private static DateTime ToUtc(DateTime local) => local.ToUniversalTime();
+
         public async Task<int> GetSalesTodayCountAsync()
         {
-            var today = DateTime.UtcNow.Date;
-            return await _context.Sales.CountAsync(s => s.SaleDate.Date == today);
+            var start = ToUtc(DateTime.Now.Date);
+            var end = ToUtc(DateTime.Now.Date.AddDays(1));
+            return await _context.Sales.CountAsync(s => s.SaleDate >= start && s.SaleDate < end);
         }
 
         public async Task<decimal> GetSalesTodayAmountAsync()
         {
-            var today = DateTime.UtcNow.Date;
+            var start = ToUtc(DateTime.Now.Date);
+            var end = ToUtc(DateTime.Now.Date.AddDays(1));
             return await _context.Sales
-                .Where(s => s.SaleDate.Date == today)
+                .Where(s => s.SaleDate >= start && s.SaleDate < end)
                 .SumAsync(s => (decimal?)s.TotalAmount) ?? 0;
         }
 
         public async Task<int> GetSalesWeekCountAsync()
         {
-            var weekStart = DateTime.UtcNow.Date.AddDays(-6);
-            return await _context.Sales.CountAsync(s => s.SaleDate.Date >= weekStart);
+            var start = ToUtc(DateTime.Now.Date.AddDays(-6));
+            return await _context.Sales.CountAsync(s => s.SaleDate >= start);
         }
 
         public async Task<decimal> GetSalesWeekAmountAsync()
         {
-            var weekStart = DateTime.UtcNow.Date.AddDays(-6);
+            var start = ToUtc(DateTime.Now.Date.AddDays(-6));
             return await _context.Sales
-                .Where(s => s.SaleDate.Date >= weekStart)
+                .Where(s => s.SaleDate >= start)
                 .SumAsync(s => (decimal?)s.TotalAmount) ?? 0;
         }
 
         public async Task<int> GetSalesMonthCountAsync()
         {
-            var monthStart = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
-            return await _context.Sales.CountAsync(s => s.SaleDate.Date >= monthStart);
+            var now = DateTime.Now;
+            var start = ToUtc(new DateTime(now.Year, now.Month, 1));
+            return await _context.Sales.CountAsync(s => s.SaleDate >= start);
         }
 
         public async Task<decimal> GetSalesMonthAmountAsync()
         {
-            var monthStart = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
+            var now = DateTime.Now;
+            var start = ToUtc(new DateTime(now.Year, now.Month, 1));
             return await _context.Sales
-                .Where(s => s.SaleDate.Date >= monthStart)
+                .Where(s => s.SaleDate >= start)
                 .SumAsync(s => (decimal?)s.TotalAmount) ?? 0;
         }
 
@@ -61,24 +67,28 @@ namespace PatriSystem.DataAccess.Repositories
 
         public async Task<IEnumerable<DailySalesResponseDto>> GetLast7DaysSalesAsync()
         {
-            var weekStart = DateTime.UtcNow.Date.AddDays(-6);
-            return await _context.Sales
-                .Where(s => s.SaleDate.Date >= weekStart)
-                .GroupBy(s => s.SaleDate.Date)
+            var start = ToUtc(DateTime.Now.Date.AddDays(-6));
+            var sales = await _context.Sales
+                .Where(s => s.SaleDate >= start)
+                .ToListAsync();
+
+            return sales
+                .GroupBy(s => s.SaleDate.ToLocalTime().Date)
                 .Select(g => new DailySalesResponseDto
                 {
                     Date = g.Key,
                     Amount = g.Sum(s => s.TotalAmount)
                 })
                 .OrderBy(x => x.Date)
-                .ToListAsync();
+                .ToList();
         }
 
         public async Task<IEnumerable<TopProductResponseDto>> GetTopProductsLastMonthAsync()
         {
-            var monthStart = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1);
+            var now = DateTime.Now;
+            var start = ToUtc(new DateTime(now.Year, now.Month, 1));
             return await _context.SaleDetails
-                .Where(sd => sd.Sale.SaleDate.Date >= monthStart && sd.ProductName != null)
+                .Where(sd => sd.Sale.SaleDate >= start && sd.ProductName != null)
                 .GroupBy(sd => sd.ProductName)
                 .Select(g => new TopProductResponseDto
                 {

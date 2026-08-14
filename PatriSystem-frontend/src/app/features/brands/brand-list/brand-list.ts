@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormControl, Validators } from '@angular/forms';
 import { BrandService } from '../../../core/services/brand.service';
@@ -25,10 +25,11 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
     MatFormFieldModule,
     MatInputModule,
     MatProgressSpinnerModule,
-    PaginatorComponent
+    PaginatorComponent,
   ],
   templateUrl: './brand-list.html',
-  styleUrl: './brand-list.scss'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './brand-list.scss',
 })
 export class BrandListComponent implements OnInit {
   private brandService = inject(BrandService);
@@ -46,35 +47,36 @@ export class BrandListComponent implements OnInit {
   searchControl = new FormControl('');
 
   form = this.fb.group({
-  brandName: ['', Validators.required],
-  brandDescription: [null as string | null]
+    brandName: ['', Validators.required],
+    brandDescription: [null as string | null],
   });
 
   ngOnInit(): void {
     this.loadBrands();
 
-    this.searchControl.valueChanges.pipe(
-      debounceTime(400),
-      distinctUntilChanged()
-    ).subscribe(() => {
-      this.currentPage.set(1);
-      this.loadBrands();
-    });
+    this.searchControl.valueChanges
+      .pipe(debounceTime(400), distinctUntilChanged())
+      .subscribe(() => {
+        this.currentPage.set(1);
+        this.loadBrands();
+      });
   }
 
   loadBrands(): void {
     this.loading.set(true);
-    this.brandService.getPaginated(this.currentPage(), this.searchControl.value ?? undefined).subscribe({
-      next: (response) => {
-        this.brands.set(response.items);
-        this.totalPages.set(response.totalPages);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.notification.error('Error al cargar las marcas');
-        this.loading.set(false);
-      }
-    });
+    this.brandService
+      .getPaginated(this.currentPage(), this.searchControl.value ?? undefined)
+      .subscribe({
+        next: (response) => {
+          this.brands.set(response.items);
+          this.totalPages.set(response.totalPages);
+          this.loading.set(false);
+        },
+        error: () => {
+          this.notification.error('Error al cargar las marcas');
+          this.loading.set(false);
+        },
+      });
   }
 
   onPageChange(page: number): void {
@@ -99,16 +101,22 @@ export class BrandListComponent implements OnInit {
 
     const editing = this.editingBrand();
     if (editing) {
-      this.brandService.update(editing.id, this.form.value.brandName!, this.form.value.brandDescription ?? undefined).subscribe({
-        next: () => {
-          this.notification.success('Marca actualizada correctamente');
-          this.form.reset();
-          this.showForm.set(false);
-          this.editingBrand.set(null);
-          this.loadBrands();
-        },
-        error: () => this.notification.error('Error al actualizar la marca')
-      });
+      this.brandService
+        .update(
+          editing.id,
+          this.form.value.brandName!,
+          this.form.value.brandDescription ?? undefined,
+        )
+        .subscribe({
+          next: () => {
+            this.notification.success('Marca actualizada correctamente');
+            this.form.reset();
+            this.showForm.set(false);
+            this.editingBrand.set(null);
+            this.loadBrands();
+          },
+          error: () => this.notification.error('Error al actualizar la marca'),
+        });
     } else {
       this.brandService.create(this.form.value as any).subscribe({
         next: () => {
@@ -117,7 +125,7 @@ export class BrandListComponent implements OnInit {
           this.showForm.set(false);
           this.loadBrands();
         },
-        error: () => this.notification.error('Error al crear la marca')
+        error: () => this.notification.error('Error al crear la marca'),
       });
     }
   }

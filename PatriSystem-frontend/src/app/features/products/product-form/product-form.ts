@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -32,10 +32,11 @@ import { MatDialogModule } from '@angular/material/dialog';
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatDialogModule
+    MatDialogModule,
   ],
   templateUrl: './product-form.html',
-  styleUrl: './product-form.scss'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './product-form.scss',
 })
 export class ProductFormComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -60,7 +61,7 @@ export class ProductFormComponent implements OnInit {
     categoryId: ['', Validators.required],
     brandId: ['', Validators.required],
     unitPrice: [null, [Validators.required, Validators.min(0.01)]],
-    unitOfMeasure: [null]
+    unitOfMeasure: [null],
   });
 
   ngOnInit(): void {
@@ -78,14 +79,14 @@ export class ProductFormComponent implements OnInit {
   loadCategories(): void {
     this.categoryService.getAll().subscribe({
       next: (categories) => this.categories.set(categories),
-      error: () => this.notification.error('Error al cargar las categorías')
+      error: () => this.notification.error('Error al cargar las categorías'),
     });
   }
 
   loadBrands(): void {
     this.brandService.getAll().subscribe({
       next: (brands) => this.brands.set(brands),
-      error: () => this.notification.error('Error al cargar las marcas')
+      error: () => this.notification.error('Error al cargar las marcas'),
     });
   }
 
@@ -99,34 +100,34 @@ export class ProductFormComponent implements OnInit {
       error: () => {
         this.notification.error('Error al cargar el producto');
         this.loading.set(false);
+      },
+    });
+  }
+
+  openCategoryDialog(): void {
+    const dialogRef = this.dialog.open(CategoryDialogComponent, {
+      width: '400px',
+    });
+
+    dialogRef.afterClosed().subscribe((category: Category | null) => {
+      if (category) {
+        this.categories.update((cats) => [...cats, category]);
+        this.form.controls['categoryId'].setValue(category.id);
       }
     });
   }
 
-openCategoryDialog(): void {
-  const dialogRef = this.dialog.open(CategoryDialogComponent, {
-    width: '400px'
-  });
+  openBrandDialog(): void {
+    const dialogRef = this.dialog.open(BrandDialogComponent, {
+      width: '400px',
+    });
 
-  dialogRef.afterClosed().subscribe((category: Category | null) => {
-    if (category) {
-      this.categories.update(cats => [...cats, category]);
-      this.form.controls['categoryId'].setValue(category.id);
-    }
-  });
-}
-
-openBrandDialog(): void {
-  const dialogRef = this.dialog.open(BrandDialogComponent, {
-    width: '400px'
-  });
-
-  dialogRef.afterClosed().subscribe((brand: Brand | null) => {
-    if (brand) {
-      this.brands.update(b => [...b, brand]);
-      this.form.controls['brandId'].setValue(brand.id);
-    }
-  });
+    dialogRef.afterClosed().subscribe((brand: Brand | null) => {
+      if (brand) {
+        this.brands.update((b) => [...b, brand]);
+        this.form.controls['brandId'].setValue(brand.id);
+      }
+    });
   }
 
   submit(): void {
@@ -134,7 +135,7 @@ openBrandDialog(): void {
 
     this.loading.set(true);
     const value = this.form.value;
-     const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/products';
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/products';
 
     if (this.isEdit() && this.productId()) {
       this.productService.update(this.productId()!, value).subscribe({
@@ -150,7 +151,7 @@ openBrandDialog(): void {
         error: () => {
           this.notification.error('Error al actualizar el producto');
           this.loading.set(false);
-        }
+        },
       });
     } else {
       this.productService.create(value).subscribe({
@@ -166,13 +167,13 @@ openBrandDialog(): void {
         error: () => {
           this.notification.error('Error al crear el producto');
           this.loading.set(false);
-        }
+        },
       });
     }
   }
 
   goBack(): void {
-  const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/products';
-  this.router.navigate([returnUrl]);
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/products';
+    this.router.navigate([returnUrl]);
   }
 }

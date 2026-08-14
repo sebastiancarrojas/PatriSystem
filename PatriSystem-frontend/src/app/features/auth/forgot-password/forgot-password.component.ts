@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -21,10 +21,11 @@ import { NotificationService } from '../../../core/services/notification.service
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
   ],
   templateUrl: './forgot-password.html',
-  styleUrl: './forgot-password.scss'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './forgot-password.scss',
 })
 export class ForgotPasswordComponent {
   private fb = inject(FormBuilder);
@@ -35,7 +36,7 @@ export class ForgotPasswordComponent {
   emailSent = signal(false);
 
   form = this.fb.group({
-    email: ['', [Validators.required, Validators.email]]
+    email: ['', [Validators.required, Validators.email]],
   });
 
   submit(): void {
@@ -53,7 +54,7 @@ export class ForgotPasswordComponent {
       error: () => {
         this.loading.set(false);
         this.notification.error('Ocurrió un error. Intenta nuevamente.');
-      }
+      },
     });
   }
 }

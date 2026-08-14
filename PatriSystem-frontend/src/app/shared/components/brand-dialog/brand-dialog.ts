@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -18,10 +18,11 @@ import { Brand } from '../../../core/models/brand.model';
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
-    MatButtonModule
+    MatButtonModule,
   ],
   templateUrl: './brand-dialog.html',
-  styleUrl: './brand-dialog.scss'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './brand-dialog.scss',
 })
 export class BrandDialogComponent {
   private fb = inject(FormBuilder);
@@ -31,7 +32,7 @@ export class BrandDialogComponent {
 
   form = this.fb.group({
     brandName: ['', Validators.required],
-    brandDescription: [null]
+    brandDescription: [null],
   });
 
   submit(): void {
@@ -42,7 +43,7 @@ export class BrandDialogComponent {
         this.notification.success('Marca creada correctamente');
         this.dialogRef.close(brand);
       },
-      error: () => this.notification.error('Error al crear la marca')
+      error: () => this.notification.error('Error al crear la marca'),
     });
   }
 

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -18,10 +18,11 @@ import { Category } from '../../../core/models/category.model';
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
-    MatButtonModule
+    MatButtonModule,
   ],
   templateUrl: './category-dialog.html',
-  styleUrl: './category-dialog.scss'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './category-dialog.scss',
 })
 export class CategoryDialogComponent {
   private fb = inject(FormBuilder);
@@ -30,7 +31,7 @@ export class CategoryDialogComponent {
   private dialogRef = inject(MatDialogRef<CategoryDialogComponent>);
 
   form = this.fb.group({
-    categoryName: ['', Validators.required]
+    categoryName: ['', Validators.required],
   });
 
   submit(): void {
@@ -41,7 +42,7 @@ export class CategoryDialogComponent {
         this.notification.success('Categoría creada correctamente');
         this.dialogRef.close(category);
       },
-      error: () => this.notification.error('Error al crear la categoría')
+      error: () => this.notification.error('Error al crear la categoría'),
     });
   }
 

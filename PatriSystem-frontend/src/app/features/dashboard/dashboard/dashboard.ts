@@ -1,4 +1,12 @@
-import { Component, inject, OnInit, signal, NgZone, OnDestroy } from '@angular/core';
+import {
+  Component,
+  inject,
+  OnInit,
+  signal,
+  NgZone,
+  OnDestroy,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -22,10 +30,11 @@ Chart.register(...registerables);
     MatButtonModule,
     MatProgressSpinnerModule,
     BaseChartDirective,
-    DatePipe
+    DatePipe,
   ],
   templateUrl: './dashboard.html',
-  styleUrl: './dashboard.scss'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './dashboard.scss',
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   private dashboardService = inject(DashboardService);
@@ -48,10 +57,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
       y: {
         grid: { color: 'rgba(0,0,0,0.05)' },
         ticks: {
-          callback: (value) => '$' + Number(value).toLocaleString('es-CO')
-        }
-      }
-    }
+          callback: (value) => '$' + Number(value).toLocaleString('es-CO'),
+        },
+      },
+    },
   };
 
   ngOnInit(): void {
@@ -72,7 +81,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       error: () => {
         this.notification.error('Error al cargar el dashboard');
         this.loading.set(false);
-      }
+      },
     });
   }
 
@@ -82,29 +91,33 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   updateTime(): void {
     const now = new Date();
-    this.currentTime.set(now.toLocaleTimeString('es-CO', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: true
-    }));
+    this.currentTime.set(
+      now.toLocaleTimeString('es-CO', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true,
+      }),
+    );
   }
 
   buildChart(data: Dashboard): void {
-  this.chartData = {
-    labels: data.last7DaysSales.map(d =>
-      new Date(d.date).toLocaleDateString('es-CO', { day: '2-digit', month: 'short' })
+    this.chartData = {
+      labels: data.last7DaysSales.map((d) =>
+        new Date(d.date).toLocaleDateString('es-CO', { day: '2-digit', month: 'short' }),
       ),
-      datasets: [{
-        data: data.last7DaysSales.map(d => d.amount),
-        borderColor: '#374151',
-        backgroundColor: 'rgba(55, 65, 81, 0.06)',
-        borderWidth: 2,
-        pointBackgroundColor: '#374151',
-        pointRadius: 4,
-        fill: true,
-        tension: 0.4
-      }]
+      datasets: [
+        {
+          data: data.last7DaysSales.map((d) => d.amount),
+          borderColor: '#374151',
+          backgroundColor: 'rgba(55, 65, 81, 0.06)',
+          borderWidth: 2,
+          pointBackgroundColor: '#374151',
+          pointRadius: 4,
+          fill: true,
+          tension: 0.4,
+        },
+      ],
     };
   }
 

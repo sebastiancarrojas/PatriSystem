@@ -7,9 +7,16 @@ namespace PatriSystem.DataAccess.Seeders
     {
         public static async Task SeedAsync(UserManager<ApplicationUser> userManager)
         {
-            const string email = "admin@patrisystem.com";
-            const string password = "Admin123!";
+            await SeedUserAsync(userManager, "admin@patrisystem.com", "Admin123!", "Administrador");
+            await SeedUserAsync(userManager, "sebascarrojas@gmail.com", "Admin123!", "Sebastian Carrojas");
+        }
 
+        private static async Task SeedUserAsync(
+            UserManager<ApplicationUser> userManager,
+            string email,
+            string password,
+            string fullName)
+        {
             var existingUser = await userManager.FindByEmailAsync(email);
             if (existingUser != null) return;
 
@@ -17,7 +24,7 @@ namespace PatriSystem.DataAccess.Seeders
             {
                 UserName = email,
                 Email = email,
-                FullName = "Administrador",
+                FullName = fullName,
                 EmailConfirmed = true,
                 IsActive = true
             };

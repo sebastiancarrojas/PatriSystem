@@ -8,6 +8,7 @@ using PatriSystem.API.Middlewares;
 using PatriSystem.DataAccess.Context;
 using PatriSystem.DataAccess.Repositories;
 using PatriSystem.DataAccess.Seeders;
+using PatriSystem.DataAccess.Services;
 using PatriSystem.Domain.Common;
 using PatriSystem.Domain.Entities;
 using PatriSystem.Domain.Interfaces.Repositories;
@@ -47,6 +48,15 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
 })
 .AddEntityFrameworkStores<PatriSystemDbContext>()
 .AddDefaultTokenProviders();
+
+// ── Password reset token expiration ──
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+    options.TokenLifespan = TimeSpan.FromMinutes(30));
+
+// ── Email (SendGrid via MailKit) ──
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.Configure<FrontendSettings>(builder.Configuration.GetSection("FrontendSettings"));
+builder.Services.AddScoped<IEmailSender, EmailSender>();
 
 // ── JWT ──
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>()!;

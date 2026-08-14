@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { CategoryService } from '../../../core/services/category.service';
@@ -26,10 +26,11 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
     MatFormFieldModule,
     MatInputModule,
     MatProgressSpinnerModule,
-    PaginatorComponent
+    PaginatorComponent,
   ],
   templateUrl: './category-list.html',
-  styleUrl: './category-list.scss'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './category-list.scss',
 })
 export class CategoryListComponent implements OnInit {
   private categoryService = inject(CategoryService);
@@ -47,34 +48,35 @@ export class CategoryListComponent implements OnInit {
   searchControl = new FormControl('');
 
   form = this.fb.group({
-    categoryName: ['', Validators.required]
+    categoryName: ['', Validators.required],
   });
 
   ngOnInit(): void {
     this.loadCategories();
 
-    this.searchControl.valueChanges.pipe(
-      debounceTime(400),
-      distinctUntilChanged()
-    ).subscribe(() => {
-      this.currentPage.set(1);
-      this.loadCategories();
-    });
+    this.searchControl.valueChanges
+      .pipe(debounceTime(400), distinctUntilChanged())
+      .subscribe(() => {
+        this.currentPage.set(1);
+        this.loadCategories();
+      });
   }
 
   loadCategories(): void {
     this.loading.set(true);
-    this.categoryService.getPaginated(this.currentPage(), this.searchControl.value ?? undefined).subscribe({
-      next: (response) => {
-        this.categories.set(response.items);
-        this.totalPages.set(response.totalPages);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.notification.error('Error al cargar las categorías');
-        this.loading.set(false);
-      }
-    });
+    this.categoryService
+      .getPaginated(this.currentPage(), this.searchControl.value ?? undefined)
+      .subscribe({
+        next: (response) => {
+          this.categories.set(response.items);
+          this.totalPages.set(response.totalPages);
+          this.loading.set(false);
+        },
+        error: () => {
+          this.notification.error('Error al cargar las categorías');
+          this.loading.set(false);
+        },
+      });
   }
 
   onPageChange(page: number): void {
@@ -107,7 +109,7 @@ export class CategoryListComponent implements OnInit {
           this.editingCategory.set(null);
           this.loadCategories();
         },
-        error: () => this.notification.error('Error al actualizar la categoría')
+        error: () => this.notification.error('Error al actualizar la categoría'),
       });
     } else {
       this.categoryService.create(this.form.value as any).subscribe({
@@ -117,7 +119,7 @@ export class CategoryListComponent implements OnInit {
           this.showForm.set(false);
           this.loadCategories();
         },
-        error: () => this.notification.error('Error al crear la categoría')
+        error: () => this.notification.error('Error al crear la categoría'),
       });
     }
   }

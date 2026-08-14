@@ -1,4 +1,11 @@
-import { Component, Input, Output, EventEmitter, OnChanges } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  OnChanges,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -8,7 +15,8 @@ import { MatIconModule } from '@angular/material/icon';
   standalone: true,
   imports: [CommonModule, MatButtonModule, MatIconModule],
   templateUrl: './paginator.html',
-  styleUrl: './paginator.scss'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './paginator.scss',
 })
 export class PaginatorComponent implements OnChanges {
   @Input() currentPage: number = 1;

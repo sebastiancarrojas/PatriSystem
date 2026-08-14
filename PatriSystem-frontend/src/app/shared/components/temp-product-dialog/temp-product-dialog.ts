@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -15,10 +15,11 @@ import { MatButtonModule } from '@angular/material/button';
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
-    MatButtonModule
+    MatButtonModule,
   ],
   templateUrl: './temp-product-dialog.html',
-  styleUrl: './temp-product-dialog.scss'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './temp-product-dialog.scss',
 })
 export class TempProductDialogComponent {
   private fb = inject(FormBuilder);
@@ -26,7 +27,7 @@ export class TempProductDialogComponent {
 
   form = this.fb.group({
     productName: ['', Validators.required],
-    unitPrice: [null, [Validators.required, Validators.min(0.01)]]
+    unitPrice: [null, [Validators.required, Validators.min(0.01)]],
   });
 
   submit(): void {

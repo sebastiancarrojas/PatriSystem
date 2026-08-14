@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -9,7 +9,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
-
 
 @Component({
   selector: 'app-login',
@@ -22,10 +21,11 @@ import { NotificationService } from '../../../core/services/notification.service
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
   ],
   templateUrl: './login.html',
-  styleUrl: './login.scss'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './login.scss',
 })
 export class LoginComponent {
   private fb = inject(FormBuilder);
@@ -38,7 +38,7 @@ export class LoginComponent {
 
   form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(8)]]
+    password: ['', [Validators.required, Validators.minLength(8)]],
   });
 
   submit(): void {
@@ -59,7 +59,7 @@ export class LoginComponent {
       error: () => {
         this.notification.error('Error al iniciar sesión');
         this.loading.set(false);
-      }
+      },
     });
   }
 }

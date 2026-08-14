@@ -1,6 +1,12 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  Validators,
+  AbstractControl,
+  ValidationErrors,
+} from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -27,10 +33,11 @@ function passwordsMatchValidator(control: AbstractControl): ValidationErrors | n
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
   ],
   templateUrl: './reset-password.html',
-  styleUrl: './reset-password.scss'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './reset-password.scss',
 })
 export class ResetPasswordComponent implements OnInit {
   private fb = inject(FormBuilder);
@@ -50,9 +57,9 @@ export class ResetPasswordComponent implements OnInit {
   form = this.fb.group(
     {
       newPassword: ['', [Validators.required, Validators.minLength(8)]],
-      confirmPassword: ['', [Validators.required]]
+      confirmPassword: ['', [Validators.required]],
     },
-    { validators: passwordsMatchValidator }
+    { validators: passwordsMatchValidator },
   );
 
   ngOnInit(): void {
@@ -75,7 +82,7 @@ export class ResetPasswordComponent implements OnInit {
         token: this.token,
         email: this.email,
         newPassword: newPassword!,
-        confirmPassword: confirmPassword!
+        confirmPassword: confirmPassword!,
       })
       .subscribe({
         next: (response) => {
@@ -90,7 +97,7 @@ export class ResetPasswordComponent implements OnInit {
         error: (err) => {
           this.loading.set(false);
           this.notification.error(err.error?.message ?? 'El enlace no es válido o ha expirado');
-        }
+        },
       });
   }
 }

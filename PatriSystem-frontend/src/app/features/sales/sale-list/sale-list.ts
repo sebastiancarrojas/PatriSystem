@@ -1,9 +1,9 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
-import { SaleService} from '../../../core/services/sale.service';
+import { SaleService } from '../../../core/services/sale.service';
 import { SalePaginationRequest } from '../../../core/models/pagination.model';
 import { NotificationService } from '../../../core/services/notification.service';
 import { Sale } from '../../../core/models/sale.model';
@@ -32,10 +32,11 @@ import { PaginatorComponent } from '../../../shared/components/paginator/paginat
     MatInputModule,
     MatDatepickerModule,
     MatNativeDateModule,
-    PaginatorComponent
+    PaginatorComponent,
   ],
   templateUrl: './sale-list.html',
-  styleUrl: './sale-list.scss'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './sale-list.scss',
 })
 export class SaleListComponent implements OnInit {
   private saleService = inject(SaleService);
@@ -45,7 +46,13 @@ export class SaleListComponent implements OnInit {
   loading = signal(false);
   currentPage = signal(1);
   totalPages = signal(1);
-  displayedColumns: string[] = ['saleNumberFormatted', 'saleDate', 'totalAmount', 'items', 'actions'];
+  displayedColumns: string[] = [
+    'saleNumberFormatted',
+    'saleDate',
+    'totalAmount',
+    'items',
+    'actions',
+  ];
 
   searchControl = new FormControl('');
   startDateControl = new FormControl<Date | null>(null);
@@ -53,28 +60,27 @@ export class SaleListComponent implements OnInit {
 
   request: SalePaginationRequest = {
     page: 1,
-    recordsPerPage: 10
+    recordsPerPage: 10,
   };
 
   ngOnInit(): void {
     this.loadSales();
 
-    this.searchControl.valueChanges.pipe(
-      debounceTime(400),
-      distinctUntilChanged()
-    ).subscribe(value => {
-      this.request.filter = value ?? undefined;
-      this.request.page = 1;
-      this.loadSales();
-    });
+    this.searchControl.valueChanges
+      .pipe(debounceTime(400), distinctUntilChanged())
+      .subscribe((value) => {
+        this.request.filter = value ?? undefined;
+        this.request.page = 1;
+        this.loadSales();
+      });
 
-    this.startDateControl.valueChanges.subscribe(value => {
+    this.startDateControl.valueChanges.subscribe((value) => {
       this.request.startDate = value?.toISOString() ?? undefined;
       this.request.page = 1;
       this.loadSales();
     });
 
-    this.endDateControl.valueChanges.subscribe(value => {
+    this.endDateControl.valueChanges.subscribe((value) => {
       this.request.endDate = value?.toISOString() ?? undefined;
       this.request.page = 1;
       this.loadSales();
@@ -93,7 +99,7 @@ export class SaleListComponent implements OnInit {
       error: () => {
         this.notification.error('Error al cargar las ventas');
         this.loading.set(false);
-      }
+      },
     });
   }
 

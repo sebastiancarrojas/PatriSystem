@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormControl, Validators } from '@angular/forms';
@@ -34,10 +34,11 @@ import { TempProductDialogComponent } from '../../../shared/components/temp-prod
     MatInputModule,
     MatAutocompleteModule,
     MatProgressSpinnerModule,
-    MatDialogModule
+    MatDialogModule,
   ],
   templateUrl: './sale-form.html',
-  styleUrl: './sale-form.scss'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './sale-form.scss',
 })
 export class SaleFormComponent {
   private saleService = inject(SaleService);
@@ -63,14 +64,16 @@ export class SaleFormComponent {
   }
 
   constructor() {
-    this.searchControl.valueChanges.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      switchMap(term => {
-        if (!term || term.length < 2) return of([]);
-        return this.productService.searchForSale(term);
-      })
-    ).subscribe(results => this.searchResults.set(results));
+    this.searchControl.valueChanges
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap((term) => {
+          if (!term || term.length < 2) return of([]);
+          return this.productService.searchForSale(term);
+        }),
+      )
+      .subscribe((results) => this.searchResults.set(results));
   }
 
   onProductSelected(product: ProductSearch): void {
@@ -96,24 +99,32 @@ export class SaleFormComponent {
       return;
     }
 
-    const existing = this.details().find(d => d.productId === product.id);
+    const existing = this.details().find((d) => d.productId === product.id);
     if (existing) {
-      this.details.update(details =>
-        details.map(d => d.productId === product.id
-          ? { ...d, quantity: d.quantity + quantity, subTotal: d.unitPrice * (d.quantity + quantity) }
-          : d
-        )
+      this.details.update((details) =>
+        details.map((d) =>
+          d.productId === product.id
+            ? {
+                ...d,
+                quantity: d.quantity + quantity,
+                subTotal: d.unitPrice * (d.quantity + quantity),
+              }
+            : d,
+        ),
       );
     } else {
       const subTotal = product.unitPrice * quantity;
-      this.details.update(details => [...details, {
-        productId: product.id,
-        quantity,
-        productName: product.productName,
-        unitPrice: product.unitPrice,
-        isTemporary: false,
-        subTotal
-      }]);
+      this.details.update((details) => [
+        ...details,
+        {
+          productId: product.id,
+          quantity,
+          productName: product.productName,
+          unitPrice: product.unitPrice,
+          isTemporary: false,
+          subTotal,
+        },
+      ]);
     }
 
     this.searchControl.setValue('');
@@ -123,113 +134,116 @@ export class SaleFormComponent {
   }
 
   removeDetail(productId: string): void {
-    this.details.update(details => details.filter(d => d.productId !== productId));
+    this.details.update((details) => details.filter((d) => d.productId !== productId));
   }
 
   submit(): void {
-  if (this.details().length === 0) {
-    this.notification.error('Agrega al menos un producto');
-    return;
+    if (this.details().length === 0) {
+      this.notification.error('Agrega al menos un producto');
+      return;
+    }
+
+    const dialogRef = this.dialog.open(SaleConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        total: this.total,
+        items: this.details().length,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) this.registerSale();
+    });
   }
 
-  const dialogRef = this.dialog.open(SaleConfirmDialogComponent, {
-    width: '400px',
-    data: {
-      total: this.total,
-      items: this.details().length
-    }
-  });
+  registerSale(): void {
+    this.loading.set(true);
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/sales';
+    const sale = {
+      details: this.details().map((d) => {
+        const isTemp = d.productId != null && d.productId.startsWith('temp-');
+        return {
+          productId: isTemp ? undefined : d.productId,
+          quantity: d.quantity,
+          unitPrice: d.unitPrice,
+          isTemporary: isTemp,
+          productName: isTemp ? d.productName : undefined,
+        };
+      }),
+    };
 
-  dialogRef.afterClosed().subscribe(confirmed => {
-    if (confirmed) this.registerSale();
-  });
-}
-
-registerSale(): void {
-  this.loading.set(true);
-  const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/sales';
-  const sale = {
-    details: this.details().map(d => {
-      const isTemp = d.productId != null && d.productId.startsWith('temp-');
-      return {
-        productId: isTemp ? undefined : d.productId,
-        quantity: d.quantity,
-        unitPrice: d.unitPrice,
-        isTemporary: isTemp,
-        productName: isTemp ? d.productName : undefined
-      };
-    })
-  };
-
-  this.saleService.create(sale).subscribe({
-    next: (response) => {
-      if (response.isSuccess) {
-        this.notification.success('Venta registrada correctamente');
-        this.router.navigate([returnUrl]);
-      } else {
-        this.notification.error(response.message);
-      }
-      this.loading.set(false);
-    },
-    error: () => {
-      this.notification.error('Error al registrar la venta');
-      this.loading.set(false);
-    }
-  });
+    this.saleService.create(sale).subscribe({
+      next: (response) => {
+        if (response.isSuccess) {
+          this.notification.success('Venta registrada correctamente');
+          this.router.navigate([returnUrl]);
+        } else {
+          this.notification.error(response.message);
+        }
+        this.loading.set(false);
+      },
+      error: () => {
+        this.notification.error('Error al registrar la venta');
+        this.loading.set(false);
+      },
+    });
   }
 
   updateQuantity(productId: string, quantity: number): void {
-  if (quantity <= 0) {
-    this.notification.error('La cantidad debe ser mayor a 0');
-    return;
-  }
+    if (quantity <= 0) {
+      this.notification.error('La cantidad debe ser mayor a 0');
+      return;
+    }
 
-  this.details.update(details =>
-    details.map(d => d.productId === productId
-      ? { ...d, quantity, subTotal: d.unitPrice * quantity }
-      : d
-    )
-  );
+    this.details.update((details) =>
+      details.map((d) =>
+        d.productId === productId ? { ...d, quantity, subTotal: d.unitPrice * quantity } : d,
+      ),
+    );
   }
 
   updatePrice(productId: string, price: number): void {
-  if (price <= 0) {
-    this.notification.error('El precio debe ser mayor a 0');
-    return;
-  }
-
-  this.details.update(details =>
-    details.map(d => d.productId === productId
-      ? { ...d, unitPrice: price, subTotal: price * d.quantity }
-      : d
-    )
-  );
-  }
-  
-  openTempProductDialog(): void {
-  const dialogRef = this.dialog.open(TempProductDialogComponent, {
-    width: '400px'
-  });
-
-  dialogRef.afterClosed().subscribe((product: { productName: string; unitPrice: number } | null) => {
-    if (product) {
-      const tempId = 'temp-' + Date.now();
-      const subTotal = product.unitPrice * 1;
-
-      this.details.update(details => [...details, {
-        productId: tempId,
-        quantity: 1,
-        productName: product.productName,
-        unitPrice: product.unitPrice,
-        isTemporary: true,
-        subTotal
-      }]);
+    if (price <= 0) {
+      this.notification.error('El precio debe ser mayor a 0');
+      return;
     }
-  });
+
+    this.details.update((details) =>
+      details.map((d) =>
+        d.productId === productId ? { ...d, unitPrice: price, subTotal: price * d.quantity } : d,
+      ),
+    );
+  }
+
+  openTempProductDialog(): void {
+    const dialogRef = this.dialog.open(TempProductDialogComponent, {
+      width: '400px',
+    });
+
+    dialogRef
+      .afterClosed()
+      .subscribe((product: { productName: string; unitPrice: number } | null) => {
+        if (product) {
+          const tempId = 'temp-' + Date.now();
+          const subTotal = product.unitPrice * 1;
+
+          this.details.update((details) => [
+            ...details,
+            {
+              productId: tempId,
+              quantity: 1,
+              productName: product.productName,
+              unitPrice: product.unitPrice,
+              isTemporary: true,
+              subTotal,
+            },
+          ]);
+        }
+      });
   }
 
   goBack(): void {
-  const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/sales';
-  this.router.navigate([returnUrl]);
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/sales';
+    this.router.navigate([returnUrl]);
   }
 }

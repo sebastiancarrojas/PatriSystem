@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
@@ -37,10 +37,11 @@ import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialo
     MatInputModule,
     MatSelectModule,
     PaginatorComponent,
-    MatDialogModule
+    MatDialogModule,
   ],
   templateUrl: './product-list.html',
-  styleUrl: './product-list.scss'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './product-list.scss',
 })
 export class ProductListComponent implements OnInit {
   private productService = inject(ProductService);
@@ -56,7 +57,15 @@ export class ProductListComponent implements OnInit {
   totalCount = signal(0);
   currentPage = signal(1);
   totalPages = signal(1);
-  displayedColumns: string[] = ['productName', 'barcode', 'categoryName', 'brandName', 'unitPrice', 'status', 'actions'];
+  displayedColumns: string[] = [
+    'productName',
+    'barcode',
+    'categoryName',
+    'brandName',
+    'unitPrice',
+    'status',
+    'actions',
+  ];
 
   searchControl = new FormControl('');
   categoryControl = new FormControl('');
@@ -65,7 +74,7 @@ export class ProductListComponent implements OnInit {
 
   request: ProductPaginationRequest = {
     page: 1,
-    recordsPerPage: 10
+    recordsPerPage: 10,
   };
 
   ngOnInit(): void {
@@ -73,28 +82,27 @@ export class ProductListComponent implements OnInit {
     this.loadCategories();
     this.loadBrands();
 
-    this.searchControl.valueChanges.pipe(
-      debounceTime(400),
-      distinctUntilChanged()
-    ).subscribe(value => {
-      this.request.filter = value ?? undefined;
-      this.request.page = 1;
-      this.loadProducts();
-    });
+    this.searchControl.valueChanges
+      .pipe(debounceTime(400), distinctUntilChanged())
+      .subscribe((value) => {
+        this.request.filter = value ?? undefined;
+        this.request.page = 1;
+        this.loadProducts();
+      });
 
-    this.categoryControl.valueChanges.subscribe(value => {
+    this.categoryControl.valueChanges.subscribe((value) => {
       this.request.categoryId = value ?? undefined;
       this.request.page = 1;
       this.loadProducts();
     });
 
-    this.brandControl.valueChanges.subscribe(value => {
+    this.brandControl.valueChanges.subscribe((value) => {
       this.request.brandId = value ?? undefined;
       this.request.page = 1;
       this.loadProducts();
     });
 
-    this.statusControl.valueChanges.subscribe(value => {
+    this.statusControl.valueChanges.subscribe((value) => {
       this.request.status = value === '' ? undefined : value === 'true';
       this.request.page = 1;
       this.loadProducts();
@@ -114,21 +122,21 @@ export class ProductListComponent implements OnInit {
       error: () => {
         this.notification.error('Error al cargar los productos');
         this.loading.set(false);
-      }
+      },
     });
   }
 
   loadCategories(): void {
     this.categoryService.getAll().subscribe({
       next: (categories) => this.categories.set(categories),
-      error: () => this.notification.error('Error al cargar las categorías')
+      error: () => this.notification.error('Error al cargar las categorías'),
     });
   }
 
   loadBrands(): void {
     this.brandService.getAll().subscribe({
       next: (brands) => this.brands.set(brands),
-      error: () => this.notification.error('Error al cargar las marcas')
+      error: () => this.notification.error('Error al cargar las marcas'),
     });
   }
 
@@ -147,48 +155,48 @@ export class ProductListComponent implements OnInit {
   }
 
   deactivate(id: string): void {
-  const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-    width: '400px',
-    data: { message: '¿Estás seguro de desactivar este producto?' }
-  });
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: { message: '¿Estás seguro de desactivar este producto?' },
+    });
 
-  dialogRef.afterClosed().subscribe(confirmed => {
-    if (confirmed) {
-      this.productService.deactivate(id).subscribe({
-        next: (response) => {
-          if (response.isSuccess) {
-            this.notification.success('Producto desactivado correctamente');
-            this.loadProducts();
-          } else {
-            this.notification.error(response.message);
-          }
-        },
-        error: () => this.notification.error('Error al desactivar el producto')
-      });
-    }
-  });
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.productService.deactivate(id).subscribe({
+          next: (response) => {
+            if (response.isSuccess) {
+              this.notification.success('Producto desactivado correctamente');
+              this.loadProducts();
+            } else {
+              this.notification.error(response.message);
+            }
+          },
+          error: () => this.notification.error('Error al desactivar el producto'),
+        });
+      }
+    });
   }
 
   activate(id: string): void {
-  const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-    width: '400px',
-    data: { message: '¿Estás seguro de activar este producto?' }
-  });
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: { message: '¿Estás seguro de activar este producto?' },
+    });
 
-  dialogRef.afterClosed().subscribe(confirmed => {
-    if (confirmed) {
-      this.productService.activate(id).subscribe({
-        next: (response) => {
-          if (response.isSuccess) {
-            this.notification.success('Producto activado correctamente');
-            this.loadProducts();
-          } else {
-            this.notification.error(response.message);
-          }
-        },
-        error: () => this.notification.error('Error al activar el producto')
-      });
-    }
-  });
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.productService.activate(id).subscribe({
+          next: (response) => {
+            if (response.isSuccess) {
+              this.notification.success('Producto activado correctamente');
+              this.loadProducts();
+            } else {
+              this.notification.error(response.message);
+            }
+          },
+          error: () => this.notification.error('Error al activar el producto'),
+        });
+      }
+    });
   }
 }

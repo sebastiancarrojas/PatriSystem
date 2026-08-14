@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { SaleService } from '../../../core/services/sale.service';
@@ -20,10 +20,11 @@ import { MatCardModule } from '@angular/material/card';
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatCardModule
+    MatCardModule,
   ],
   templateUrl: './sale-detail.html',
-  styleUrl: './sale-detail.scss'
+  changeDetection: ChangeDetectionStrategy.Eager,
+  styleUrl: './sale-detail.scss',
 })
 export class SaleDetailComponent implements OnInit {
   private saleService = inject(SaleService);
@@ -50,7 +51,7 @@ export class SaleDetailComponent implements OnInit {
       error: () => {
         this.notification.error('Error al cargar la venta');
         this.loading.set(false);
-      }
+      },
     });
   }
 

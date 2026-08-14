@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -10,9 +10,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
 
-
 @Component({
-  selector: 'app-login',
+  selector: 'app-forgot-password',
   standalone: true,
   imports: [
     CommonModule,
@@ -24,41 +23,36 @@ import { NotificationService } from '../../../core/services/notification.service
     MatIconModule,
     MatProgressSpinnerModule
   ],
-  templateUrl: './login.html',
-  styleUrl: './login.scss'
+  templateUrl: './forgot-password.html',
+  styleUrl: './forgot-password.scss'
 })
-export class LoginComponent {
+export class ForgotPasswordComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private notification = inject(NotificationService);
-  private router = inject(Router);
 
   loading = signal(false);
-  hidePassword = signal(true);
+  emailSent = signal(false);
 
   form = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(8)]]
+    email: ['', [Validators.required, Validators.email]]
   });
 
   submit(): void {
     if (this.form.invalid) return;
 
     this.loading.set(true);
-    const { email, password } = this.form.value;
+    const { email } = this.form.value;
 
-    this.authService.login({ email: email!, password: password! }).subscribe({
+    this.authService.forgotPassword({ email: email! }).subscribe({
       next: (response) => {
-        if (response.isSuccess) {
-          this.router.navigate(['/dashboard']);
-        } else {
-          this.notification.error(response.message);
-        }
         this.loading.set(false);
+        this.emailSent.set(true);
+        this.notification.success(response.message);
       },
       error: () => {
-        this.notification.error('Error al iniciar sesión');
         this.loading.set(false);
+        this.notification.error('Ocurrió un error. Intenta nuevamente.');
       }
     });
   }

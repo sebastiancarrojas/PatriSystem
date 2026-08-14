@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { LoginRequest, AuthResponse } from '../models/auth.model';
+import { LoginRequest, AuthResponse, ForgotPasswordRequest, ResetPasswordRequest, ApiResponse } from '../models/auth.model';
 
 @Injectable({
   providedIn: 'root'
@@ -38,4 +38,12 @@ export class AuthService {
   isAuthenticated(): boolean {
     return !!this.getToken();
   }
+
+  forgotPassword(request: ForgotPasswordRequest): Observable<ApiResponse> {
+  return this.http.post<ApiResponse>(`${this.API_URL}/forgot-password`, request);
+}
+
+  resetPassword(request: ResetPasswordRequest): Observable<ApiResponse> {
+  return this.http.post<ApiResponse>(`${this.API_URL}/reset-password`, request);
+}
 }

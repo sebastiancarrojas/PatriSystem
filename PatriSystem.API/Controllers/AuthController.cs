@@ -26,5 +26,22 @@ namespace PatriSystem.API.Controllers
 
             return Ok(response);
         }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequestDto dto)
+        {
+            var response = await _authService.ForgotPasswordAsync(dto.Email);
+            return Ok(response);
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDto dto)
+        {
+            var response = await _authService.ResetPasswordAsync(dto.Email, dto.Token, dto.NewPassword);
+            if (!response.IsSuccess)
+                return BadRequest(response);
+
+            return Ok(response);
+        }
     }
 }

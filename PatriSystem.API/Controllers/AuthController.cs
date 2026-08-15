@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using PatriSystem.API.DTOs.Request;
 using PatriSystem.Domain.Interfaces.Services;
 
@@ -28,6 +29,7 @@ namespace PatriSystem.API.Controllers
         }
 
         [HttpPost("forgot-password")]
+        [EnableRateLimiting("PasswordResetPolicy")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequestDto dto)
         {
             var response = await _authService.ForgotPasswordAsync(dto.Email);

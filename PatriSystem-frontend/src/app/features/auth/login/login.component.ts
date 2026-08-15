@@ -50,14 +50,16 @@ export class LoginComponent {
     this.authService.login({ email: email!, password: password! }).subscribe({
       next: (response) => {
         if (response.isSuccess) {
+          sessionStorage.setItem('justLoggedIn', 'true');
           this.router.navigate(['/dashboard']);
         } else {
           this.notification.error(response.message);
         }
         this.loading.set(false);
       },
-      error: () => {
-        this.notification.error('Error al iniciar sesión');
+      error: (err) => {
+        const message = err?.error?.message ?? 'Error al iniciar sesión';
+        this.notification.error(message);
         this.loading.set(false);
       },
     });

@@ -1,8 +1,27 @@
 <div class="container">
   @if (loading()) {
-    <div class="spinner-container">
-      <mat-spinner></mat-spinner>
+  <div class="skeleton">
+    <div class="skeleton-header">
+      <div class="skeleton-block skeleton-title"></div>
+      <div class="skeleton-block skeleton-clock"></div>
     </div>
+
+    <div class="skeleton-actions">
+      <div class="skeleton-block skeleton-button"></div>
+      <div class="skeleton-block skeleton-button"></div>
+    </div>
+
+    <div class="skeleton-cards">
+      @for (i of [1,2,3,4]; track i) {
+        <div class="skeleton-block skeleton-card"></div>
+      }
+    </div>
+
+    <div class="skeleton-charts">
+      <div class="skeleton-block skeleton-chart"></div>
+      <div class="skeleton-block skeleton-chart"></div>
+    </div>
+  </div>
   } @else if (dashboard()) {
     <div class="header">
       <div>

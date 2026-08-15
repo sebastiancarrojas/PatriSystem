@@ -64,6 +64,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   };
 
   ngOnInit(): void {
+    if (sessionStorage.getItem('justLoggedIn')) {
+    sessionStorage.removeItem('justLoggedIn');
+    this.notification.success('¡Bienvenido de nuevo!');
+    }
     this.updateTime();
     this.zone.runOutsideAngular(() => {
       this.timer = setInterval(() => {

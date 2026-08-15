@@ -33,11 +33,11 @@ namespace PatriSystem.Domain.Services
         {
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null || !user.IsActive)
-                return Response<string>.Failure("Credenciales incorrectas");
+                return Response<string>.Failure("Las credenciales ingresadas no son válidas");
 
             var isValid = await _userManager.CheckPasswordAsync(user, password);
             if (!isValid)
-                return Response<string>.Failure("Credenciales incorrectas");
+                return Response<string>.Failure("Las credenciales ingresadas no son válidas");
 
             var token = GenerateJwtToken(user);
             return Response<string>.Success(token, "Login exitoso");

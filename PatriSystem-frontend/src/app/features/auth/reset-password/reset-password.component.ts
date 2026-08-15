@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   ReactiveFormsModule,
@@ -36,7 +36,6 @@ function passwordsMatchValidator(control: AbstractControl): ValidationErrors | n
     MatProgressSpinnerModule,
   ],
   templateUrl: './reset-password.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './reset-password.scss',
 })
 export class ResetPasswordComponent implements OnInit {
@@ -56,7 +55,11 @@ export class ResetPasswordComponent implements OnInit {
 
   form = this.fb.group(
     {
-      newPassword: ['', [Validators.required, Validators.minLength(8)]],
+      newPassword: ['', [
+        Validators.required,
+        Validators.minLength(8),
+        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/)
+      ]],
       confirmPassword: ['', [Validators.required]],
     },
     { validators: passwordsMatchValidator },

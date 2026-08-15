@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -10,11 +11,14 @@ using PatriSystem.DataAccess.Repositories;
 using PatriSystem.DataAccess.Seeders;
 using PatriSystem.DataAccess.Services;
 using PatriSystem.Domain.Common;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using PatriSystem.Domain.Entities;
 using PatriSystem.Domain.Interfaces.Repositories;
 using PatriSystem.Domain.Interfaces.Services;
 using PatriSystem.Domain.Services;
 using System.Text;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -99,6 +103,11 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));
 
+// FluendValidation
+
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
 // Controllers
 builder.Services.AddControllers(options =>
 {
@@ -134,9 +143,33 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("PasswordResetPolicy", limiterOptions =>
+    {
+        limiterOptions.Window = TimeSpan.FromMinutes(15);
+        limiterOptions.PermitLimit = 3;
+        limiterOptions.QueueLimit = 0;
+        limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+    });
+
+    options.OnRejected = async (context, token) =>
+    {
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        await context.HttpContext.Response.WriteAsJsonAsync(new
+        {
+            isSuccess = false,
+            message = "Demasiados intentos. Intenta nuevamente en unos minutos."
+        }, token);
+    };
+});
+
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionMiddleware>();
+
+app.UseRateLimiter();
 
 if (app.Environment.IsDevelopment())
 {

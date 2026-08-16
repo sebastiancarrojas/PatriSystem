@@ -54,7 +54,7 @@ namespace PatriSystem.Domain.Services
                 existing.Barcode = product.Barcode;
                 existing.ProductDescription = product.ProductDescription;
                 existing.UnitPrice = product.UnitPrice;
-                existing.UnitOfMeasure = product.UnitOfMeasure;
+                existing.UnitOfMeasureId = product.UnitOfMeasureId;
                 existing.CategoryId = product.CategoryId;
                 existing.BrandId = product.BrandId;
 

@@ -75,10 +75,19 @@
         }
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Unidad de medida</mat-label>
-        <input matInput formControlName="unitOfMeasure" />
-      </mat-form-field>
+      <div class="field-with-action">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Unidad de medida</mat-label>
+          <mat-select formControlName="unitOfMeasureId">
+            @for (unit of unitsOfMeasure(); track unit.id) {
+              <mat-option [value]="unit.id">{{ unit.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <button class="btn-add-inline" type="button" (click)="openUnitOfMeasureDialog()">
+          <mat-icon>add_circle</mat-icon>
+        </button>
+      </div>
 
       <div class="actions">
         <button class="btn-cancel" type="button" (click)="goBack()">Cancelar</button>

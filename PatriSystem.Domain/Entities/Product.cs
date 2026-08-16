@@ -8,17 +8,18 @@
         public decimal UnitPrice { get; set; }
         public int CurrentStock { get; set; }
         public int StockMin { get; set; }
-        public string UnitOfMeasure { get; set; } = string.Empty;
         public string? ImageUrl { get; set; }
         public bool Status { get; set; } = true;
 
         // Foreign Keys
         public Guid CategoryId { get; set; }
         public Guid BrandId { get; set; }
+        public Guid? UnitOfMeasureId { get; set; }
 
         // Navigation Properties
         public Category Category { get; set; } = null!;
         public Brand Brand { get; set; } = null!;
+        public UnitOfMeasure? UnitOfMeasure { get; set; }
         public ICollection<SaleDetail> SaleDetails { get; set; } = new List<SaleDetail>();
     }
 }

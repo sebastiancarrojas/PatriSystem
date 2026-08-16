@@ -7,7 +7,6 @@
         public string? Barcode { get; set; }
         public string? ProductDescription { get; set; }
         public decimal UnitPrice { get; set; }
-        public string? UnitOfMeasure { get; set; }
         public bool Status { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
@@ -19,5 +18,9 @@
         // Brand
         public Guid BrandId { get; set; }
         public string BrandName { get; set; } = string.Empty;
+
+        // UnitOfMeasure
+        public Guid? UnitOfMeasureId { get; set; }
+        public string? UnitOfMeasureName { get; set; }
     }
 }

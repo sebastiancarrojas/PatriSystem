@@ -18,6 +18,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialogModule } from '@angular/material/dialog';
+import { UnitOfMeasureService } from '../../../core/services/unit-of-measure.service';
+import { UnitOfMeasure } from '../../../core/models/unit-of-measure.model';
+import { UnitOfMeasureDialogComponent } from '../../../shared/components/unit-of-measure-dialog/unit-of-measure-dialog';
 
 @Component({
   selector: 'app-product-form',
@@ -45,11 +48,13 @@ export class ProductFormComponent implements OnInit {
   private productService = inject(ProductService);
   private categoryService = inject(CategoryService);
   private brandService = inject(BrandService);
+  private unitOfMeasureService = inject(UnitOfMeasureService);
   private notification = inject(NotificationService);
   private dialog = inject(MatDialog);
 
   categories = signal<Category[]>([]);
   brands = signal<Brand[]>([]);
+  unitsOfMeasure = signal<UnitOfMeasure[]>([]);
   loading = signal(false);
   isEdit = signal(false);
   productId = signal<string | null>(null);
@@ -61,12 +66,13 @@ export class ProductFormComponent implements OnInit {
     categoryId: ['', Validators.required],
     brandId: ['', Validators.required],
     unitPrice: [null, [Validators.required, Validators.min(0.01)]],
-    unitOfMeasure: [null],
+    unitOfMeasureId: [null],
   });
 
   ngOnInit(): void {
     this.loadCategories();
     this.loadBrands();
+    this.loadUnitsOfMeasure();
 
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
@@ -87,6 +93,13 @@ export class ProductFormComponent implements OnInit {
     this.brandService.getAll().subscribe({
       next: (brands) => this.brands.set(brands),
       error: () => this.notification.error('Error al cargar las marcas'),
+    });
+  }
+
+  loadUnitsOfMeasure(): void {
+    this.unitOfMeasureService.getAll().subscribe({
+      next: (unitsOfMeasure) => this.unitsOfMeasure.set(unitsOfMeasure),
+      error: () => this.notification.error('Error al cargar las unidades de medida'),
     });
   }
 
@@ -126,6 +139,19 @@ export class ProductFormComponent implements OnInit {
       if (brand) {
         this.brands.update((b) => [...b, brand]);
         this.form.controls['brandId'].setValue(brand.id);
+      }
+    });
+  }
+
+  openUnitOfMeasureDialog(): void {
+    const dialogRef = this.dialog.open(UnitOfMeasureDialogComponent, {
+      width: '400px',
+    });
+
+    dialogRef.afterClosed().subscribe((unitOfMeasure: UnitOfMeasure | null) => {
+      if (unitOfMeasure) {
+        this.unitsOfMeasure.update((u) => [...u, unitOfMeasure]);
+        this.form.controls['unitOfMeasureId'].setValue(unitOfMeasure.id);
       }
     });
   }

@@ -21,6 +21,6 @@ namespace PatriSystem.API.DTOs.Request
         [Range(0.01, double.MaxValue, ErrorMessage = "El precio debe ser mayor a 0")]
         public decimal UnitPrice { get; set; }
 
-        public string? UnitOfMeasure { get; set; }
+        public Guid? UnitOfMeasureId { get; set; }
     }
 }

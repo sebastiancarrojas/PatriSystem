@@ -4,7 +4,6 @@ export interface Product {
   barcode: string | null;
   productDescription: string | null;
   unitPrice: number;
-  unitOfMeasure: string | null;
   status: boolean;
   createdAt: string;
   updatedAt: string | null;
@@ -12,6 +11,8 @@ export interface Product {
   categoryName: string;
   brandId: string;
   brandName: string;
+  unitOfMeasureId: string | null;
+  unitOfMeasureName: string | null;
 }
 
 export interface CreateProductRequest {
@@ -21,7 +22,7 @@ export interface CreateProductRequest {
   categoryId: string;
   brandId: string;
   unitPrice: number;
-  unitOfMeasure: string | null;
+  unitOfMeasureId: string | null;
 }
 
 export interface UpdateProductRequest {
@@ -31,7 +32,7 @@ export interface UpdateProductRequest {
   categoryId: string;
   brandId: string;
   unitPrice: number;
-  unitOfMeasure: string | null;
+  unitOfMeasureId: string | null;
 }
 
 export interface ProductSearch {

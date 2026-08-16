@@ -33,6 +33,7 @@ namespace PatriSystem.DataAccess.Repositories
             return await _context.Products
                 .Include(p => p.Category)
                 .Include(p => p.Brand)
+                .Include(p => p.UnitOfMeasure)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
@@ -41,6 +42,7 @@ namespace PatriSystem.DataAccess.Repositories
             return await _context.Products
                 .Include(p => p.Category)
                 .Include(p => p.Brand)
+                .Include(p => p.UnitOfMeasure)
                 .ToListAsync();
         }
 
@@ -67,6 +69,7 @@ namespace PatriSystem.DataAccess.Repositories
             var queryable = _context.Products
                 .Include(p => p.Category)
                 .Include(p => p.Brand)
+                .Include(p => p.UnitOfMeasure)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(request.Filter))

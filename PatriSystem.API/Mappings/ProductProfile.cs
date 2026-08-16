@@ -14,7 +14,8 @@ namespace PatriSystem.API.Mappings
             CreateMap<UpdateProductRequestDto, Product>();
             CreateMap<Product, ProductResponseDto>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.CategoryName))
-                .ForMember(dest => dest.BrandName, opt => opt.MapFrom(src => src.Brand.BrandName));
+                .ForMember(dest => dest.BrandName, opt => opt.MapFrom(src => src.Brand.BrandName))
+                .ForMember(dest => dest.UnitOfMeasureName, opt => opt.MapFrom(src => src.UnitOfMeasure != null ? src.UnitOfMeasure.Name : null));
         }
     }
 }

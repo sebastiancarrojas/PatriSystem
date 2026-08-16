@@ -14,6 +14,7 @@ namespace PatriSystem.DataAccess.Context
         public DbSet<Category> Categories { get; set; }
         public DbSet<Brand> Brands { get; set; }
         public DbSet<Product> Products { get; set; }
+        public DbSet<UnitOfMeasure> UnitsOfMeasure { get; set; }
         public DbSet<Sale> Sales { get; set; }
         public DbSet<SaleDetail> SaleDetails { get; set; }
 

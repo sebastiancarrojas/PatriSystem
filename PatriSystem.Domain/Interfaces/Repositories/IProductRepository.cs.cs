@@ -14,5 +14,7 @@ namespace PatriSystem.Domain.Interfaces.Repositories
         Task<PaginationResponse<Product>> GetPaginatedAsync(ProductPaginationRequest request);
         Task<List<Product>> SearchForSaleAsync(string term);
         Task ActivateAsync(Guid id);
+        Task<bool> ExistsWithSkuAsync(string sku);
+        Task<int> GetNextSkuSequenceValueAsync();
     }
 }

@@ -6,7 +6,9 @@ namespace PatriSystem.API.DTOs.Request
     {
         [Required(ErrorMessage = "El nombre del producto es requerido")]
         public string ProductName { get; set; } = string.Empty;
-
+        [Required(ErrorMessage = "El SKU es requerido")]
+        public string Sku { get; set; } = string.Empty;
+        public int StockMin { get; set; } = 0;
         public string? Barcode { get; set; }
 
         public string? ProductDescription { get; set; }

@@ -22,6 +22,14 @@ namespace PatriSystem.DataAccess.Context
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.HasSequence<int>("ProductSkuSequence")
+                .StartsAt(1)
+                .IncrementsBy(1);
+
+            modelBuilder.Entity<Product>()
+                .HasIndex(p => p.Sku)
+                .IsUnique();
+
             modelBuilder.Entity<Product>()
                 .Property(p => p.UnitPrice)
                 .HasPrecision(18, 2);

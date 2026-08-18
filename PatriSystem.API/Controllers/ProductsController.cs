@@ -126,5 +126,14 @@ namespace PatriSystem.API.Controllers
                 return BadRequest(response);
             return Ok(response);
         }
+
+        [HttpGet("next-sku")]
+        public async Task<IActionResult> GetNextSku()
+        {
+            var response = await _productService.GetNextSkuAsync();
+            if (!response.IsSuccess)
+                return BadRequest(response);
+            return Ok(response);
+        }
     }
 }

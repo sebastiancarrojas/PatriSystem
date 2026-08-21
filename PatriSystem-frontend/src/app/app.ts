@@ -14,17 +14,28 @@ const NO_NAVBAR_ROUTES = ['/login', '/forgot-password', '/reset-password'];
   changeDetection: ChangeDetectionStrategy.Eager,
   animations: [routeAnimations],
   template: `
-    @if (showNavbar()) {
-      <app-navbar />
-    }
-    <div class="route-container" [@routeAnimations]="outlet.isActivated ? outlet.activatedRoute : ''">
-      <router-outlet #outlet="outlet" />
+    <div class="app-shell">
+      @if (showNavbar()) {
+        <app-navbar />
+      }
+      <main class="route-container" [@routeAnimations]="outlet.isActivated ? outlet.activatedRoute : ''">
+        <router-outlet #outlet="outlet" />
+      </main>
     </div>
   `,
   styles: [`
-    .route-container {
-      position: relative;
+    .app-shell {
+      display: flex;
+      height: 100vh;
       overflow: hidden;
+    }
+
+    .route-container {
+      flex: 1;
+      overflow-y: auto;
+      position: relative;
+      height: 100vh;
+      min-width: 0;
     }
   `],
 })

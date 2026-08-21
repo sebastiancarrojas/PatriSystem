@@ -41,4 +41,8 @@ export class ProductService {
   activate(id: string): Observable<ApiResponse<object>> {
   return this.api.patch<ApiResponse<object>>(`Products/${id}/activate`, {});
   }
+
+  getNextSku(): Observable<ApiResponse<string>> {
+    return this.api.get<ApiResponse<string>>('Products/next-sku');
+  }
 }

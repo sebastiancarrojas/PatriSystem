@@ -28,6 +28,21 @@ namespace PatriSystem.DataAccess.Repositories
                 .AnyAsync(p => p.Barcode == barcode);
         }
 
+        public async Task<bool> ExistsWithSkuAsync(string Sku)
+        {
+            return await _context.Products
+                .AnyAsync(p => p.Sku == Sku);
+        }
+
+        public async Task<int> GetNextSkuSequenceValueAsync()
+        {
+            var result = await _context.Database
+                .SqlQueryRaw<int>("SELECT NEXT VALUE FOR ProductSkuSequence As Value")
+                .ToListAsync();
+
+            return result.First();
+        }
+
         public async Task<Product?> GetByIdAsync(Guid id)
         {
             return await _context.Products

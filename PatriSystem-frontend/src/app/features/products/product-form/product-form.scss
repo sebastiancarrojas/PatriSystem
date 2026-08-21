@@ -1,30 +1,33 @@
-.container {
+.page-container {
   padding: 24px;
-  max-width: 600px;
-  margin: 0 auto;
   background: var(--color-background);
   min-height: 100vh;
 }
 
+/* max-width lives here, not on .page-container, so the background fills
+   the full viewport while the content stays constrained and centered */
 .header {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
 
   h2 {
     margin: 0;
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 500;
     color: var(--color-text-primary);
   }
 }
 
 .btn-back {
-  width: 36px;
-  height: 36px;
-  background: transparent;
-  border: 1px solid var(--color-border);
+  width: 32px;
+  height: 32px;
+  background: var(--color-surface);
+  border: 0.5px solid var(--color-border);
   border-radius: 8px;
   cursor: pointer;
   display: flex;
@@ -39,9 +42,9 @@
   }
 
   mat-icon {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
   }
 }
 
@@ -51,18 +54,72 @@
   padding: 48px;
 }
 
-form {
+.form-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 24px;
+  align-items: start;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.form-card {
+  background: var(--color-surface);
+  border: 0.5px solid var(--color-border);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  background: var(--color-surface);
-  padding: 24px;
-  border-radius: 12px;
-  border: 0.5px solid var(--color-border);
+  padding: 10px 0;
+
+  &:first-child {
+    padding-top: 0;
+  }
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+}
+
+.group-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-secondary);
+}
+
+.group-divider {
+  height: 1px;
+  background: var(--color-border);
+}
+
+.field-row {
+  display: flex;
+  gap: 16px;
+
+  mat-form-field {
+    flex: 1;
+  }
 }
 
 mat-form-field {
   width: 100%;
+}
+
+/* Overrides Material's default field height/padding for a denser layout.
+   ::ng-deep is scoped to .form-card to avoid leaking into other components */
+::ng-deep .form-card .mat-mdc-form-field-infix {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  min-height: 0;
 }
 
 .field-with-action {
@@ -79,12 +136,14 @@ mat-form-field {
   }
 }
 
-.btn-add-inline {
-  width: 36px;
-  height: 36px;
+/* !important + element selector needed to win over Material's own
+   button radius rules, which otherwise take precedence here */
+button.btn-add-inline {
+  width: 32px;
+  height: 32px;
   background: transparent;
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: 8px !important;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -97,30 +156,84 @@ mat-form-field {
   }
 
   mat-icon {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
   }
 }
 
-.actions {
+.form-summary {
+  position: sticky;
+  top: 24px;
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.summary-card {
+  background: var(--color-surface);
+  border: 0.5px solid var(--color-border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.summary-card .group-label {
+  margin-bottom: 2px;
+}
+
+.summary-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.summary-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-secondary);
+}
+
+.summary-value {
+  font-size: 13px;
+  color: var(--color-text-primary);
+  font-weight: 500;
+  word-break: break-word;
+}
+
+.summary-divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: 4px 0;
+}
+
+.summary-price {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.summary-actions {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
-  margin-top: 8px;
 }
 
 .btn-cancel {
-  height: 40px;
+  height: 36px;
   font-size: 13px;
   font-weight: 500;
   font-family: Roboto, sans-serif;
-  background: transparent;
+  background: var(--color-surface);
   color: var(--color-text-secondary);
-  border: 1px solid var(--color-border);
+  border: 0.5px solid var(--color-border);
   border-radius: 8px;
   padding: 0 16px;
   cursor: pointer;
+  width: 100%;
 
   &:hover {
     border-color: var(--color-primary);
@@ -129,7 +242,7 @@ mat-form-field {
 }
 
 .btn-submit {
-  height: 40px;
+  height: 36px;
   font-size: 13px;
   font-weight: 500;
   font-family: Roboto, sans-serif;
@@ -139,7 +252,99 @@ mat-form-field {
   border-radius: 8px;
   padding: 0 16px;
   cursor: pointer;
+  width: 100%;
 
-  &:disabled { opacity: 0.5; cursor: not-allowed; }
-  &:hover:not(:disabled) { opacity: 0.85; }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &:hover:not(:disabled) {
+    opacity: 0.85;
+  }
+}
+
+.shortcuts-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+
+  span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--color-text-muted);
+  }
+}
+
+kbd {
+  display: inline-block;
+  font-family: Roboto, sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  background: var(--color-background);
+  border: 0.5px solid var(--color-border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+  .page-container {
+    padding: 16px 16px 80px;
+  }
+
+  .form-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .form-summary {
+    position: static;
+  }
+
+  /* Pinned above mobile viewports so save/cancel stay reachable
+     without scrolling to the bottom of a long form */
+  .summary-actions {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    flex-direction: row;
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-border);
+    padding: 12px 16px;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
+    z-index: 10;
+
+    .btn-cancel,
+    .btn-submit {
+      flex: 1;
+    }
+  }
+
+  .field-row {
+    flex-direction: column;
+  }
+}
+
+.btn-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: btn-spin 0.6s linear infinite;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

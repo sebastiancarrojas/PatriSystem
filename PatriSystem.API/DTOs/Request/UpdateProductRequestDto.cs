@@ -6,8 +6,11 @@ namespace PatriSystem.API.DTOs.Request
     {
         [Required(ErrorMessage = "El nombre del producto es requerido")]
         public string ProductName { get; set; } = string.Empty;
+        [Required(ErrorMessage = "El SKU es requerido")]
+        public string Sku { get; set; } = string.Empty;
 
         public string? Barcode { get; set; }
+        public int StockMin { get; set; } = 0;
 
         public string? ProductDescription { get; set; }
 
@@ -21,6 +24,6 @@ namespace PatriSystem.API.DTOs.Request
         [Range(0.01, double.MaxValue, ErrorMessage = "El precio debe ser mayor a 0")]
         public decimal UnitPrice { get; set; }
 
-        public string? UnitOfMeasure { get; set; }
+        public Guid? UnitOfMeasureId { get; set; }
     }
 }

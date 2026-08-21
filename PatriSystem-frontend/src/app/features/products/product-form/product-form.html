@@ -1,6 +1,7 @@
-<div class="container">
+<div class="page-container">
   <div class="header">
-    <button class="btn-back" type="button" (click)="goBack()">
+    <!-- tabindex="-1": excluded from the Enter/Tab navigation chain, only reachable by click -->
+    <button class="btn-back" type="button" (click)="goBack()" tabindex="-1">
       <mat-icon>arrow_back</mat-icon>
     </button>
     <h2>{{ isEdit() ? 'Editar Producto' : 'Nuevo Producto' }}</h2>
@@ -11,90 +12,222 @@
       <mat-spinner></mat-spinner>
     </div>
   } @else {
-    <form [formGroup]="form" (ngSubmit)="submit()">
-      <mat-form-field appearance="outline">
-        <mat-label>Nombre del producto</mat-label>
-        <input matInput formControlName="productName" />
-        @if (form.get('productName')?.hasError('required')) {
-          <mat-error>El nombre es requerido</mat-error>
-        }
-      </mat-form-field>
+    <form [formGroup]="form" (ngSubmit)="submit()" (keydown)="onFormKeydown($event)" class="form-layout">
 
-      <mat-form-field appearance="outline">
-        <mat-label>Código de barras</mat-label>
-        <input matInput formControlName="barcode" />
-      </mat-form-field>
+      <div class="form-card">
 
-      <mat-form-field appearance="outline">
-        <mat-label>Descripción</mat-label>
-        <textarea matInput formControlName="productDescription" rows="3"></textarea>
-      </mat-form-field>
+        <div class="form-group">
+          <span class="group-label">Información general</span>
 
-      <div class="field-with-action">
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Categoría</mat-label>
-          <mat-select formControlName="categoryId">
-            @for (category of categories(); track category.id) {
-              <mat-option [value]="category.id">{{ category.categoryName }}</mat-option>
+          <mat-form-field appearance="outline">
+            <mat-label>Nombre del producto</mat-label>
+            <input
+              #nameInput
+              matInput
+              formControlName="productName"
+              (keydown.enter)="onNameEnter($event)"
+              (keydown)="onNameKeydown($event)"
+            />
+            @if (form.get('productName')?.hasError('required')) {
+              <mat-error>El nombre es requerido</mat-error>
             }
-          </mat-select>
-          @if (form.get('categoryId')?.hasError('required')) {
-            <mat-error>La categoría es requerida</mat-error>
-          }
-        </mat-form-field>
-        <button class="btn-add-inline" type="button" (click)="openCategoryDialog()">
-          <mat-icon>add_circle</mat-icon>
-        </button>
+          </mat-form-field>
+
+          <div class="field-row">
+            <mat-form-field appearance="outline">
+              <mat-label>SKU</mat-label>
+              <input #skuInput matInput formControlName="sku" (keydown.enter)="onSkuEnter($event)" />
+              @if (form.get('sku')?.hasError('required')) {
+                <mat-error>El SKU es requerido</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Código de barras</mat-label>
+              <input #barcodeInput matInput formControlName="barcode" (keydown.enter)="onBarcodeEnter($event)" />
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Descripción</mat-label>
+            <!-- (keydown), not (keydown.enter): needs the raw event to tell Shift+Enter (newline) from plain Enter (advance) -->
+            <textarea
+              #descriptionInput
+              matInput
+              formControlName="productDescription"
+              rows="2"
+              (keydown)="onDescriptionEnter($event)"
+            ></textarea>
+          </mat-form-field>
+        </div>
+
+        <div class="group-divider"></div>
+
+        <div class="form-group">
+          <span class="group-label">Precio e inventario</span>
+
+          <div class="field-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Precio</mat-label>
+              <input #priceInput matInput type="number" formControlName="unitPrice" (keydown.enter)="onPriceEnter($event)" />
+              @if (form.get('unitPrice')?.hasError('required')) {
+                <mat-error>El precio es requerido</mat-error>
+              }
+              @if (form.get('unitPrice')?.hasError('min')) {
+                <mat-error>El precio debe ser mayor a 0</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Stock mínimo</mat-label>
+              <input #stockInput matInput type="number" formControlName="stockMin" (keydown.enter)="onStockEnter($event)" />
+              @if (form.get('stockMin')?.hasError('min')) {
+                <mat-error>El stock mínimo no puede ser negativo</mat-error>
+              }
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="group-divider"></div>
+
+        <div class="form-group">
+          <span class="group-label">Clasificación</span>
+
+          <!-- #categoryWrap / #brandWrap / #unitWrap: read by interceptEnter() in the component -->
+          <!-- to catch Enter presses from ngx-mat-select-search's overlay input and move focus forward -->
+          <div class="field-row">
+            <div class="field-with-action" #categoryWrap>
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Categoría</mat-label>
+                <mat-select #categorySelect formControlName="categoryId" (selectionChange)="onCategorySelected()">
+                  <mat-option>
+                    <ngx-mat-select-search
+                      [formControl]="categoryFilterCtrl"
+                      placeholderLabel="Buscar categoría..."
+                      noEntriesFoundLabel="Sin resultados"
+                    ></ngx-mat-select-search>
+                  </mat-option>
+                  @for (category of filteredCategories(); track category.id) {
+                    <mat-option [value]="category.id">{{ category.categoryName }}</mat-option>
+                  }
+                </mat-select>
+                @if (form.get('categoryId')?.hasError('required')) {
+                  <mat-error>La categoría es requerida</mat-error>
+                }
+              </mat-form-field>
+              <button class="btn-add-inline" type="button" (click)="openCategoryDialog()" tabindex="-1">
+                <mat-icon>add_circle</mat-icon>
+              </button>
+            </div>
+
+            <div class="field-with-action" #brandWrap>
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Marca</mat-label>
+                <mat-select #brandSelect formControlName="brandId" (selectionChange)="onBrandSelected()">
+                  <mat-option>
+                    <ngx-mat-select-search
+                      [formControl]="brandFilterCtrl"
+                      placeholderLabel="Buscar marca..."
+                      noEntriesFoundLabel="Sin resultados"
+                    ></ngx-mat-select-search>
+                  </mat-option>
+                  @for (brand of filteredBrands(); track brand.id) {
+                    <mat-option [value]="brand.id">{{ brand.brandName }}</mat-option>
+                  }
+                </mat-select>
+                @if (form.get('brandId')?.hasError('required')) {
+                  <mat-error>La marca es requerida</mat-error>
+                }
+              </mat-form-field>
+              <button class="btn-add-inline" type="button" (click)="openBrandDialog()" tabindex="-1">
+                <mat-icon>add_circle</mat-icon>
+              </button>
+            </div>
+
+            <div class="field-with-action" #unitWrap>
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>Unidad de medida</mat-label>
+                <mat-select #unitSelect formControlName="unitOfMeasureId">
+                  <mat-option>
+                    <ngx-mat-select-search
+                      [formControl]="unitFilterCtrl"
+                      placeholderLabel="Buscar unidad..."
+                      noEntriesFoundLabel="Sin resultados"
+                    ></ngx-mat-select-search>
+                  </mat-option>
+                  @for (unit of filteredUnitsOfMeasure(); track unit.id) {
+                    <mat-option [value]="unit.id">{{ unit.name }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              <button class="btn-add-inline" type="button" (click)="openUnitOfMeasureDialog()" tabindex="-1">
+                <mat-icon>add_circle</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="field-with-action">
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Marca</mat-label>
-          <mat-select formControlName="brandId">
-            @for (brand of brands(); track brand.id) {
-              <mat-option [value]="brand.id">{{ brand.brandName }}</mat-option>
+      <aside class="form-summary">
+        <div class="summary-card">
+          <span class="group-label">Resumen</span>
+
+          <div class="summary-row">
+            <span class="summary-label">Nombre</span>
+            <span class="summary-value">{{ form.get('productName')?.value || '—' }}</span>
+          </div>
+
+          <div class="summary-row">
+            <span class="summary-label">SKU</span>
+            <span class="summary-value">{{ form.get('sku')?.value || '—' }}</span>
+          </div>
+
+          <div class="summary-row">
+            <span class="summary-label">Precio</span>
+            <span class="summary-value summary-price">
+              {{ form.get('unitPrice')?.value ? (form.get('unitPrice')?.value | currency:'COP':'symbol-narrow':'1.0-0') : '—' }}
+            </span>
+          </div>
+
+          <div class="summary-divider"></div>
+
+          <div class="summary-row">
+            <span class="summary-label">Categoría</span>
+            <span class="summary-value">{{ selectedCategoryName || '—' }}</span>
+          </div>
+
+          <div class="summary-row">
+            <span class="summary-label">Marca</span>
+            <span class="summary-value">{{ selectedBrandName || '—' }}</span>
+          </div>
+
+          <div class="summary-row">
+            <span class="summary-label">Unidad</span>
+            <span class="summary-value">{{ selectedUnitName || '—' }}</span>
+          </div>
+        </div>
+
+        <div class="summary-actions">
+          <button class="btn-cancel" type="button" (click)="goBack()" [disabled]="submitting()">
+            Cancelar
+          </button>
+          <button #submitButton class="btn-submit" type="submit" [disabled]="form.invalid || submitting()">
+            @if (submitting()) {
+              <span class="btn-spinner"></span>
+              Guardando...
+            } @else {
+              {{ isEdit() ? 'Guardar cambios' : 'Guardar producto' }}
             }
-          </mat-select>
-          @if (form.get('brandId')?.hasError('required')) {
-            <mat-error>La marca es requerida</mat-error>
-          }
-        </mat-form-field>
-        <button class="btn-add-inline" type="button" (click)="openBrandDialog()">
-          <mat-icon>add_circle</mat-icon>
-        </button>
-      </div>
+          </button>
+        </div>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Precio</mat-label>
-        <input matInput type="number" formControlName="unitPrice" />
-        @if (form.get('unitPrice')?.hasError('required')) {
-          <mat-error>El precio es requerido</mat-error>
-        }
-        @if (form.get('unitPrice')?.hasError('min')) {
-          <mat-error>El precio debe ser mayor a 0</mat-error>
-        }
-      </mat-form-field>
-
-      <div class="field-with-action">
-        <mat-form-field appearance="outline" subscriptSizing="dynamic">
-          <mat-label>Unidad de medida</mat-label>
-          <mat-select formControlName="unitOfMeasureId">
-            @for (unit of unitsOfMeasure(); track unit.id) {
-              <mat-option [value]="unit.id">{{ unit.name }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-        <button class="btn-add-inline" type="button" (click)="openUnitOfMeasureDialog()">
-          <mat-icon>add_circle</mat-icon>
-        </button>
-      </div>
-
-      <div class="actions">
-        <button class="btn-cancel" type="button" (click)="goBack()">Cancelar</button>
-        <button class="btn-submit" type="submit" [disabled]="form.invalid">
-          {{ isEdit() ? 'Actualizar' : 'Crear' }}
-        </button>
-      </div>
+        <div class="shortcuts-hint">
+          <span><kbd>Enter</kbd> Siguiente campo</span>
+          <span><kbd>Shift</kbd> + <kbd>Tab</kbd> Regresar</span>
+          <span><kbd>Ctrl</kbd> + <kbd>Enter</kbd> Guardar</span>
+          <span><kbd>Esc</kbd> Cancelar</span>
+        </div>
+      </aside>
     </form>
   }
 </div>

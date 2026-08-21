@@ -38,7 +38,12 @@ builder.Services.AddCors(options =>
 
 // Database
 builder.Services.AddDbContext<PatriSystemDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlOptions => sqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(30),
+            errorNumbersToAdd: null)));
 
 // ── Identity ──
 builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
@@ -187,8 +192,16 @@ app.MapControllers();
 // ── Data Seeder ──
 using (var scope = app.Services.CreateScope())
 {
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-    await DefaultUserSeeder.SeedAsync(userManager);
+    try
+    {
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        await DefaultUserSeeder.SeedAsync(userManager);
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "No se pudo sembrar el usuario por defecto al iniciar. La aplicación continuará funcionando.");
+    }
 }
 
 app.Run();

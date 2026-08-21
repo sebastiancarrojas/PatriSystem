@@ -19,6 +19,10 @@ namespace PatriSystem.Domain.Services
         {
             try
             {
+                var skuExists = await _productRepository.ExistsWithSkuAsync(product.Sku);
+                if (skuExists)
+                    return Response<object>.Failure("Ya existe un producto con ese SKU");
+
                 if (!string.IsNullOrEmpty(product.Barcode))
                 {
                     var exists = await _productRepository.ExistsWithBarcodeAsync(product.Barcode);
@@ -43,6 +47,13 @@ namespace PatriSystem.Domain.Services
                 if (existing == null)
                     return Response<object>.Failure("Producto no encontrado");
 
+                if (!string.IsNullOrEmpty(product.Sku) && existing.Sku != product.Sku)
+                {
+                    var skuExists = await _productRepository.ExistsWithSkuAsync(product.Sku);
+                    if (skuExists)
+                        return Response<object>.Failure("Ya existe un producto con ese SKU");
+                }
+
                 if (!string.IsNullOrEmpty(product.Barcode) && existing.Barcode != product.Barcode)
                 {
                     var exists = await _productRepository.ExistsWithBarcodeAsync(product.Barcode);
@@ -51,6 +62,7 @@ namespace PatriSystem.Domain.Services
                 }
 
                 existing.ProductName = product.ProductName;
+                existing.Sku = product.Sku;
                 existing.Barcode = product.Barcode;
                 existing.ProductDescription = product.ProductDescription;
                 existing.UnitPrice = product.UnitPrice;
@@ -153,6 +165,20 @@ namespace PatriSystem.Domain.Services
             catch (Exception ex)
             {
                 return Response<object>.Failure(ex, "Error al activar el producto");
+            }
+        }
+
+        public async Task<Response<string>> GetNextSkuAsync()
+        {
+            try
+            {
+                int nextValue = await _productRepository.GetNextSkuSequenceValueAsync();
+                var sku = $"SKU-{nextValue:D5}";
+                return Response<string>.Success(sku, "SKU generado correctamente");
+            }
+            catch (Exception ex)
+            {
+                return Response<string>.Failure(ex, "Error al generar el SKU");
             }
         }
     }

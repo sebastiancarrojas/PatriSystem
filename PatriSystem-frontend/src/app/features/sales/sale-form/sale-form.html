@@ -1,115 +1,174 @@
-<div class="container">
+<div class="page-container" (keydown)="handleKeydown($event)">
   <div class="header">
-    <button class="btn-back" (click)="goBack()">
+    <button class="btn-back" (click)="goBack()" type="button">
       <mat-icon>arrow_back</mat-icon>
     </button>
     <h2>Nueva Venta</h2>
   </div>
 
-  <div class="form-section">
-    <h3>Agregar producto</h3>
-    <div class="add-product-form">
-      <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
-        <mat-label>Buscar producto</mat-label>
-        <input matInput [formControl]="searchControl"
-               [matAutocomplete]="auto"
-               placeholder="Nombre o código de barras..." />
-        <mat-icon matSuffix>search</mat-icon>
-        <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onProductSelected($event.option.value)">
-          @for (product of searchResults(); track product.id) {
-            <mat-option [value]="product">
-              <span>{{ product.productName }}</span>
-              <span class="product-price">{{ product.unitPrice | currency:'COP':'symbol':'1.0-0' }}</span>
-              <span class="product-stock">Stock: {{ product.currentStock }}</span>
-            </mat-option>
-          }
-        </mat-autocomplete>
-      </mat-form-field>
+  <div class="form-layout">
+    <div class="form-card">
+      <div class="form-group">
+        <span class="group-label">Agregar producto</span>
 
-      <mat-form-field appearance="outline" class="quantity-field" subscriptSizing="dynamic">
-        <mat-label>Cantidad</mat-label>
-        <input matInput type="number" [formControl]="quantityControl" min="1" />
-      </mat-form-field>
+        <div class="add-product-row">
+          <mat-form-field appearance="outline" class="search-field" subscriptSizing="dynamic">
+            <mat-label>Buscar producto</mat-label>
+            <input #searchInputRef
+                   matInput
+                   [formControl]="searchControl"
+                   [matAutocomplete]="auto"
+                   placeholder="Nombre o código de barras..."
+                   (keydown)="onSearchKeydown($event)"/>
+            <mat-icon matSuffix>search</mat-icon>
+            <mat-autocomplete #auto="matAutocomplete"
+                               [autoActiveFirstOption]="true"
+                               (optionSelected)="onProductSelected($event)">
+              @for (product of searchResults(); track product.id) {
+                <mat-option [value]="product">
+                  <span class="option-name">{{ product.productName }}</span>
+                  <span class="option-price">{{ product.unitPrice | currency:'COP':'symbol':'1.0-0' }}</span>
+                </mat-option>
+              }
+            </mat-autocomplete>
+          </mat-form-field>
 
-      <button class="btn-add" (click)="addDetail()" [disabled]="!selectedProduct()">
-        <mat-icon>add</mat-icon>
-        Agregar
-      </button>
+          <mat-form-field appearance="outline" class="quantity-field" subscriptSizing="dynamic">
+            <mat-label>Cantidad</mat-label>
+            <input #quantityInputRef
+                   matInput
+                   type="number"
+                   [formControl]="quantityControl"
+                   min="1"
+                   (keydown.enter)="$event.preventDefault(); onQuantityEnter()" />
+          </mat-form-field>
 
-      <button class="btn-manual" (click)="openTempProductDialog()">
-        <mat-icon>add_shopping_cart</mat-icon>
-        Manual
-      </button>
+          <button class="btn-add" (click)="addDetail()" [disabled]="!selectedProduct()" type="button">
+            <mat-icon>add</mat-icon>
+            Agregar
+          </button>
+
+          <button class="btn-manual" (click)="openTempProductDialog()" type="button">
+            <mat-icon>add_shopping_cart</mat-icon>
+            Manual
+          </button>
+        </div>
+      </div>
+
+      <div class="group-divider"></div>
+
+      <div class="form-group">
+        <span class="group-label">Detalle de la venta</span>
+
+        @if (details().length === 0) {
+          <div class="empty-state">
+            <mat-icon>shopping_cart</mat-icon>
+            <p>Aún no has agregado productos a esta venta</p>
+          </div>
+        } @else {
+          <table mat-table [dataSource]="details()" class="mat-elevation-z2">
+            <ng-container matColumnDef="productName">
+              <th mat-header-cell *matHeaderCellDef>Producto</th>
+              <td mat-cell *matCellDef="let detail">
+                {{ detail.productName }}
+                @if (detail.isTemporary) {
+                  <span class="temp-badge">Manual</span>
+                }
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="quantity">
+              <th mat-header-cell *matHeaderCellDef>Cantidad</th>
+              <td mat-cell *matCellDef="let detail">
+                <input type="number"
+                       [value]="detail.quantity"
+                       min="1"
+                       class="cell-input"
+                       [class.invalid]="isQuantityInvalid(detail)"
+                       (focus)="$any($event.target).select()"
+                       (keydown.enter)="$any($event.target).blur()"
+                       (change)="updateQuantity(detail, +$any($event.target).value)" />
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="unitPrice">
+              <th mat-header-cell *matHeaderCellDef>Precio unitario</th>
+              <td mat-cell *matCellDef="let detail">
+                <input type="number"
+                       [value]="detail.unitPrice"
+                       min="0.01"
+                       class="cell-input"
+                       [class.invalid]="isPriceInvalid(detail)"
+                       (focus)="$any($event.target).select()"
+                       (keydown.enter)="$any($event.target).blur()"
+                       (change)="updatePrice(detail, +$any($event.target).value)" />
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="subTotal">
+              <th mat-header-cell *matHeaderCellDef>Subtotal</th>
+              <td mat-cell *matCellDef="let detail" class="amount">
+                {{ detail.subTotal | currency:'COP':'symbol':'1.0-0' }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef></th>
+              <td mat-cell *matCellDef="let detail">
+                <button mat-icon-button color="warn" (click)="removeDetail(detail)" type="button">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        }
+      </div>
+    </div>
+
+    <div class="form-summary">
+      <div class="summary-card">
+        <span class="group-label">Resumen de venta</span>
+
+        <div class="summary-row">
+          <span class="summary-label">Líneas</span>
+          <span class="summary-value">{{ details().length }}</span>
+        </div>
+
+        <div class="summary-row">
+          <span class="summary-label">Unidades totales</span>
+          <span class="summary-value">{{ totalItems }}</span>
+        </div>
+
+        <div class="summary-divider"></div>
+
+        <div class="summary-row">
+          <span class="summary-label">Total</span>
+          <span class="summary-price">{{ total | currency:'COP':'symbol':'1.0-0' }}</span>
+        </div>
+
+        <div class="summary-actions">
+          <button class="btn-cancel" (click)="goBack()" type="button">Cancelar</button>
+          <button class="btn-submit"
+                  (click)="submit()"
+                  [disabled]="loading() || details().length === 0"
+                  type="button">
+            @if (loading()) {
+              <span class="btn-spinner"></span> Registrando...
+            } @else {
+              Registrar Venta
+            }
+          </button>
+        </div>
+
+        <div class="shortcuts-hint">
+          <span><kbd>Enter</kbd> agrega producto</span>
+          <span><kbd>Ctrl</kbd> + <kbd>Enter</kbd> registra venta</span>
+          <span><kbd>Esc</kbd> cancela</span>
+        </div>
+      </div>
     </div>
   </div>
-
-  @if (details().length > 0) {
-    <div class="details-section">
-      <h3>Detalle de la venta</h3>
-      <table mat-table [dataSource]="details()" class="mat-elevation-z2">
-
-        <ng-container matColumnDef="productName">
-          <th mat-header-cell *matHeaderCellDef>Producto</th>
-          <td mat-cell *matCellDef="let detail">{{ detail.productName }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="quantity">
-          <th mat-header-cell *matHeaderCellDef>Cantidad</th>
-          <td mat-cell *matCellDef="let detail">
-            <input type="number"
-                  [value]="detail.quantity"
-                  min="1"
-                  (change)="updateQuantity(detail.productId, +$any($event.target).value)"
-                  class="quantity-input" />
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="unitPrice">
-          <th mat-header-cell *matHeaderCellDef>Precio unitario</th>
-          <td mat-cell *matCellDef="let detail">
-            <input type="number"
-                  [value]="detail.unitPrice"
-                  min="0.01"
-                  (change)="updatePrice(detail.productId, +$any($event.target).value)"
-                  class="quantity-input" />
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="subTotal">
-          <th mat-header-cell *matHeaderCellDef>Subtotal</th>
-          <td mat-cell *matCellDef="let detail" class="amount">
-            {{ detail.subTotal | currency:'COP':'symbol':'1.0-0' }}
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef></th>
-          <td mat-cell *matCellDef="let detail">
-            <button mat-icon-button color="warn" (click)="removeDetail(detail.productId)">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-      </table>
-
-      <div class="total">
-        <span>Total:</span>
-        <strong>{{ total | currency:'COP':'symbol':'1.0-0' }}</strong>
-      </div>
-
-      <div class="actions">
-        <button class="btn-cancel" (click)="goBack()">Cancelar</button>
-        <button class="btn-submit" (click)="submit()" [disabled]="loading()">
-          @if (loading()) {
-            <mat-spinner diameter="20"></mat-spinner>
-          } @else {
-            Registrar Venta
-          }
-        </button>
-      </div>
-    </div>
-  }
 </div>

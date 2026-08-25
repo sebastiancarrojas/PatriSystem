@@ -128,7 +128,8 @@ namespace PatriSystem.DataAccess.Repositories
                 .Where(p =>
                     p.Status == true &&
                     (p.ProductName.Contains(term) ||
-                     (p.Barcode != null && p.Barcode.Contains(term))))
+                     (p.Barcode != null && p.Barcode.Contains(term)) ||
+                     (p.Sku != null && p.Sku.Contains(term))))
                 .OrderBy(p => p.ProductName)
                 .Take(10)
                 .ToListAsync();

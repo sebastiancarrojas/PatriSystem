@@ -1,7 +1,7 @@
 <h2 mat-dialog-title>Confirmar Venta</h2>
 
 <mat-dialog-content>
-  <p style="color: var(--color-text-secondary); font-size: 14px;">
+  <p class="subtitle">
     ¿Estás seguro de registrar esta venta?
   </p>
   <div class="summary">
@@ -17,6 +17,6 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button class="btn-cancel" (click)="cancel()">Cancelar</button>
-  <button class="btn-confirm" (click)="confirm()">Confirmar</button>
+  <button class="btn-cancel" (click)="cancel()" type="button">Cancelar</button>
+  <button class="btn-confirm" cdkFocusInitial (click)="confirm()" type="button">Confirmar</button>
 </mat-dialog-actions>

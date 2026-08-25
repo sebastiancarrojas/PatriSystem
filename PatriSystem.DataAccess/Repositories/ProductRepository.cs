@@ -92,6 +92,7 @@ namespace PatriSystem.DataAccess.Repositories
                 string filter = request.Filter.ToLower();
                 queryable = queryable.Where(p =>
                     p.ProductName.ToLower().Contains(filter) ||
+                    p.Sku.ToLower().Contains(filter) ||
                     (p.Barcode != null && p.Barcode.ToLower().Contains(filter)) ||
                     p.Category.CategoryName.ToLower().Contains(filter) ||
                     p.Brand.BrandName.ToLower().Contains(filter));

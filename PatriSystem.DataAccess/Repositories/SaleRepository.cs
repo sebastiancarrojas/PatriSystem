@@ -18,34 +18,41 @@ namespace PatriSystem.DataAccess.Repositories
 
         public async Task<Guid> CreateAsync(Sale sale, List<Product> products)
         {
-            using var transaction = await _context.Database.BeginTransactionAsync();
-            try
+            var strategy = _context.Database.CreateExecutionStrategy();
+
+            return await strategy.ExecuteAsync(async () =>
             {
-                var lastSaleNumber = await _context.Sales
-                    .OrderByDescending(s => s.SaleNumber)
-                    .Select(s => s.SaleNumber)
-                    .FirstOrDefaultAsync();
-
-                sale.SaleNumber = lastSaleNumber + 1;
-
-                foreach (var detail in sale.SaleDetails.Where(d => !d.IsTemporary && d.ProductId != null))
+                using var transaction = await _context.Database.BeginTransactionAsync();
+                try
                 {
-                    var product = products.FirstOrDefault(p => p.Id == detail.ProductId);
-                    if (product != null)
-                        product.CurrentStock -= detail.Quantity;
-                        detail.ProductName = product.ProductName;
-                }
+                    var lastSaleNumber = await _context.Sales
+                        .OrderByDescending(s => s.SaleNumber)
+                        .Select(s => s.SaleNumber)
+                        .FirstOrDefaultAsync();
 
-                await _context.Sales.AddAsync(sale);
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
-                return sale.Id;
-            }
-            catch
-            {
-                await transaction.RollbackAsync();
-                throw;
-            }
+                    sale.SaleNumber = lastSaleNumber + 1;
+
+                    foreach (var detail in sale.SaleDetails.Where(d => !d.IsTemporary && d.ProductId != null))
+                    {
+                        var product = products.FirstOrDefault(p => p.Id == detail.ProductId);
+                        if (product != null)
+                        {
+                            product.CurrentStock -= detail.Quantity;
+                            detail.ProductName = product.ProductName;
+                        }
+                    }
+
+                    await _context.Sales.AddAsync(sale);
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                    return sale.Id;
+                }
+                catch
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            });
         }
 
         public async Task<List<Sale>> GetAllAsync()

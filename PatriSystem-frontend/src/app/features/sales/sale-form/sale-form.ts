@@ -1,7 +1,14 @@
-import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  ChangeDetectionStrategy,
+  ViewChild,
+  ElementRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
-import { ReactiveFormsModule, FormBuilder, FormControl, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormControl, Validators } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
 import { SaleService } from '../../../core/services/sale.service';
 import { ProductService } from '../../../core/services/product.service';
@@ -13,12 +20,21 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import {
+  MatAutocompleteModule,
+  MatAutocompleteSelectedEvent,
+} from '@angular/material/autocomplete';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDialog } from '@angular/material/dialog';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { SaleConfirmDialogComponent } from '../../../shared/components/sale-confirm-dialog/sale-confirm-dialog';
 import { TempProductDialogComponent } from '../../../shared/components/temp-product-dialog/temp-product-dialog';
+import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog';
+import { A11yModule } from '@angular/cdk/a11y';
+
+type SaleDetailRow = CreateSaleDetailRequest & {
+  productName: string;
+  subTotal: number;
+};
 
 @Component({
   selector: 'app-sale-form',
@@ -37,7 +53,7 @@ import { TempProductDialogComponent } from '../../../shared/components/temp-prod
     MatDialogModule,
   ],
   templateUrl: './sale-form.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './sale-form.scss',
 })
 export class SaleFormComponent {
@@ -45,12 +61,15 @@ export class SaleFormComponent {
   private productService = inject(ProductService);
   private notification = inject(NotificationService);
   private router = inject(Router);
-  private fb = inject(FormBuilder);
   private dialog = inject(MatDialog);
   private route = inject(ActivatedRoute);
 
+  @ViewChild('searchInputRef') searchInputRef?: ElementRef<HTMLInputElement>;
+  @ViewChild('quantityInputRef') quantityInputRef?: ElementRef<HTMLInputElement>;
+  @ViewChild('searchInput') searchInput?: ElementRef;
+
   searchResults = signal<ProductSearch[]>([]);
-  details = signal<(CreateSaleDetailRequest & { productName: string; subTotal: number })[]>([]);
+  details = signal<SaleDetailRow[]>([]);
   loading = signal(false);
   displayedColumns: string[] = ['productName', 'quantity', 'unitPrice', 'subTotal', 'actions'];
 
@@ -63,47 +82,66 @@ export class SaleFormComponent {
     return this.details().reduce((acc, d) => acc + d.subTotal, 0);
   }
 
+  get totalItems(): number {
+    return this.details().reduce((acc, d) => acc + d.quantity, 0);
+  }
+
   constructor() {
     this.searchControl.valueChanges
       .pipe(
         debounceTime(300),
         distinctUntilChanged(),
         switchMap((term) => {
-          if (!term || term.length < 2) return of([]);
+          if (!term || typeof term !== 'string' || term.length < 2) return of([]);
           return this.productService.searchForSale(term);
         }),
       )
       .subscribe((results) => this.searchResults.set(results));
   }
 
-  onProductSelected(product: ProductSearch): void {
+  onProductSelected(event: MatAutocompleteSelectedEvent): void {
+    const product = event.option.value as ProductSearch;
     this.selectedProduct.set(product);
     this.searchControl.setValue(product.productName, { emitEvent: false });
+    this.focusQuantity();
   }
 
-  displayProduct(product: ProductSearch): string {
-    return product ? product.productName : '';
+  private focusQuantity(): void {
+    setTimeout(() => {
+      this.quantityInputRef?.nativeElement.focus({ preventScroll: true });
+      this.quantityInputRef?.nativeElement.select();
+    });
+  }
+
+  private focusSearch(): void {
+    setTimeout(() => this.searchInputRef?.nativeElement.focus({ preventScroll: true }));
+  }
+
+  onQuantityEnter(): void {
+    this.addDetail();
   }
 
   addDetail(): void {
     const product = this.selectedProduct();
-    const quantity = this.quantityControl.value!;
+    const quantity = this.quantityControl.value ?? 0;
 
     if (!product) {
-      this.notification.error('Selecciona un producto');
+      this.notification.error('Selecciona un producto de la lista');
+      this.focusSearch();
       return;
     }
 
-    if (quantity <= 0) {
+    if (!quantity || quantity <= 0) {
       this.notification.error('La cantidad debe ser mayor a 0');
       return;
     }
 
-    const existing = this.details().find((d) => d.productId === product.id);
+    const existing = this.details().find((d) => !d.isTemporary && d.productId === product.id);
+
     if (existing) {
       this.details.update((details) =>
         details.map((d) =>
-          d.productId === product.id
+          !d.isTemporary && d.productId === product.id
             ? {
                 ...d,
                 quantity: d.quantity + quantity,
@@ -131,13 +169,66 @@ export class SaleFormComponent {
     this.quantityControl.setValue(1);
     this.selectedProduct.set(null);
     this.searchResults.set([]);
+    this.focusSearch();
   }
 
-  removeDetail(productId: string): void {
-    this.details.update((details) => details.filter((d) => d.productId !== productId));
+  removeDetail(detail: SaleDetailRow): void {
+    this.details.update((details) => details.filter((d) => d !== detail));
+  }
+
+  isQuantityInvalid(detail: SaleDetailRow): boolean {
+    return !detail.quantity || detail.quantity <= 0;
+  }
+
+  isPriceInvalid(detail: SaleDetailRow): boolean {
+    return !detail.unitPrice || detail.unitPrice <= 0;
+  }
+
+  updateQuantity(detail: SaleDetailRow, quantity: number): void {
+    if (!quantity || quantity <= 0) {
+      this.notification.error('La cantidad debe ser mayor a 0');
+      return;
+    }
+    this.details.update((details) =>
+      details.map((d) => (d === detail ? { ...d, quantity, subTotal: d.unitPrice * quantity } : d)),
+    );
+  }
+
+  updatePrice(detail: SaleDetailRow, price: number): void {
+    if (!price || price <= 0) {
+      this.notification.error('El precio debe ser mayor a 0');
+      return;
+    }
+    this.details.update((details) =>
+      details.map((d) => (d === detail ? { ...d, unitPrice: price, subTotal: price * d.quantity } : d)),
+    );
+  }
+
+  openTempProductDialog(): void {
+    const dialogRef = this.dialog.open(TempProductDialogComponent, { width: '400px' });
+
+    dialogRef
+      .afterClosed()
+      .subscribe((product: { productName: string; unitPrice: number } | null) => {
+        if (product) {
+          this.details.update((details) => [
+            ...details,
+            {
+              quantity: 1,
+              productName: product.productName,
+              unitPrice: product.unitPrice,
+              isTemporary: true,
+              subTotal: product.unitPrice,
+            },
+          ]);
+        }
+        this.focusSearch();
+      });
   }
 
   submit(): void {
+    if (this.loading()) return;
+
     if (this.details().length === 0) {
       this.notification.error('Agrega al menos un producto');
       return;
@@ -145,10 +236,7 @@ export class SaleFormComponent {
 
     const dialogRef = this.dialog.open(SaleConfirmDialogComponent, {
       width: '400px',
-      data: {
-        total: this.total,
-        items: this.details().length,
-      },
+      data: { total: this.total, items: this.details().length },
     });
 
     dialogRef.afterClosed().subscribe((confirmed) => {
@@ -160,16 +248,13 @@ export class SaleFormComponent {
     this.loading.set(true);
     const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/sales';
     const sale = {
-      details: this.details().map((d) => {
-        const isTemp = d.productId != null && d.productId.startsWith('temp-');
-        return {
-          productId: isTemp ? undefined : d.productId,
-          quantity: d.quantity,
-          unitPrice: d.unitPrice,
-          isTemporary: isTemp,
-          productName: isTemp ? d.productName : undefined,
-        };
-      }),
+      details: this.details().map((d) => ({
+        productId: d.isTemporary ? undefined : d.productId,
+        quantity: d.quantity,
+        unitPrice: d.unitPrice,
+        isTemporary: d.isTemporary,
+        productName: d.isTemporary ? d.productName : undefined,
+      })),
     };
 
     this.saleService.create(sale).subscribe({
@@ -189,61 +274,48 @@ export class SaleFormComponent {
     });
   }
 
-  updateQuantity(productId: string, quantity: number): void {
-    if (quantity <= 0) {
-      this.notification.error('La cantidad debe ser mayor a 0');
+  goBack(): void {
+    if (this.details().length === 0) {
+      this.navigateBack();
       return;
     }
 
-    this.details.update((details) =>
-      details.map((d) =>
-        d.productId === productId ? { ...d, quantity, subTotal: d.unitPrice * quantity } : d,
-      ),
-    );
-  }
-
-  updatePrice(productId: string, price: number): void {
-    if (price <= 0) {
-      this.notification.error('El precio debe ser mayor a 0');
-      return;
-    }
-
-    this.details.update((details) =>
-      details.map((d) =>
-        d.productId === productId ? { ...d, unitPrice: price, subTotal: price * d.quantity } : d,
-      ),
-    );
-  }
-
-  openTempProductDialog(): void {
-    const dialogRef = this.dialog.open(TempProductDialogComponent, {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
+      data: { message: 'Hay productos sin guardar en esta venta. ¿Deseas salir de todas formas?' },
     });
 
-    dialogRef
-      .afterClosed()
-      .subscribe((product: { productName: string; unitPrice: number } | null) => {
-        if (product) {
-          const tempId = 'temp-' + Date.now();
-          const subTotal = product.unitPrice * 1;
-
-          this.details.update((details) => [
-            ...details,
-            {
-              productId: tempId,
-              quantity: 1,
-              productName: product.productName,
-              unitPrice: product.unitPrice,
-              isTemporary: true,
-              subTotal,
-            },
-          ]);
-        }
-      });
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) this.navigateBack();
+    });
   }
 
-  goBack(): void {
+  private navigateBack(): void {
     const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/sales';
     this.router.navigate([returnUrl]);
   }
+
+  handleKeydown(event: KeyboardEvent): void {
+    if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+      event.preventDefault();
+      this.submit();
+      return;
+    }
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopPropagation();
+      this.goBack();
+    }
+  }
+
+  ngAfterViewInit(): void {
+    this.searchInputRef?.nativeElement.focus({ preventScroll: true });
+  }
+
+  onSearchKeydown(event: KeyboardEvent): void {
+    if (event.shiftKey && event.key === 'Tab') {
+      event.preventDefault();
+    }
+  }
+
 }

@@ -107,6 +107,26 @@ namespace PatriSystem.DataAccess.Repositories
             if (request.Status.HasValue)
                 queryable = queryable.Where(p => p.Status == request.Status.Value);
 
+            queryable = request.SortBy?.ToLower() switch
+            {
+                "sku" => request.SortDescending
+                    ? queryable.OrderByDescending(p => p.Sku)
+                    : queryable.OrderBy(p => p.Sku),
+                "unitprice" => request.SortDescending
+                    ? queryable.OrderByDescending(p => p.UnitPrice)
+                    : queryable.OrderBy(p => p.UnitPrice),
+                "categoryname" => request.SortDescending
+                    ? queryable.OrderByDescending(p => p.Category.CategoryName)
+                    : queryable.OrderBy(p => p.Category.CategoryName),
+                "brandname" => request.SortDescending
+                    ? queryable.OrderByDescending(p => p.Brand.BrandName)
+                    : queryable.OrderBy(p => p.Brand.BrandName),
+                "productname" => request.SortDescending
+                    ? queryable.OrderByDescending(p => p.ProductName)
+                    : queryable.OrderBy(p => p.ProductName),
+                _ => queryable.OrderBy(p => p.ProductName)
+            };
+
             var pagedList = await PagedList<Product>.ToPagedListAsync(queryable, request);
 
             return new PaginationResponse<Product>

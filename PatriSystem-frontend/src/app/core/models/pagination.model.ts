@@ -16,6 +16,8 @@ export interface ProductPaginationRequest {
   categoryId?: string;
   brandId?: string;
   status?: boolean;
+  sortBy?: string;
+  sortDescending?: boolean;
 }
 
 export interface SalePaginationRequest {

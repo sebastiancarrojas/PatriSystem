@@ -116,10 +116,9 @@ mat-form-field {
 
 /* Overrides Material's default field height/padding for a denser layout.
    ::ng-deep is scoped to .form-card to avoid leaking into other components */
-::ng-deep .form-card .mat-mdc-form-field-infix {
-  padding-top: 10px;
-  padding-bottom: 10px;
-  min-height: 0;
+.form-card {
+  --mat-form-field-container-height: 44px;
+  --mat-form-field-container-vertical-padding: 10px;
 }
 
 .field-with-action {

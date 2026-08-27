@@ -12,8 +12,8 @@ export class BrandService {
     return this.api.get<Brand[]>('Brands');
   }
 
-  getPaginated(page: number = 1, filter?: string): Observable<PaginationResponse<Brand>> {
-    return this.api.get<PaginationResponse<Brand>>('Brands/paginated', { page, recordsPerPage: 10, filter });
+  getPaginated(page: number = 1, filter?: string, sortBy?: string, sortDescending?: boolean): Observable<PaginationResponse<Brand>> {
+    return this.api.get<PaginationResponse<Brand>>('Brands/paginated', { page, recordsPerPage: 10, filter, sortBy, sortDescending });
   }
 
   create(brand: CreateBrandRequest): Observable<Brand> {

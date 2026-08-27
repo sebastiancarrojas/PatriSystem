@@ -63,6 +63,14 @@ namespace PatriSystem.DataAccess.Repositories
                 b.BrandName.ToLower().Contains(request.Filter.ToLower()));
             }
 
+            queryable = request.SortBy?.ToLower() switch
+            {
+                "brandname" => request.SortDescending
+                    ? queryable.OrderByDescending(b => b.BrandName)
+                    : queryable.OrderBy(b => b.BrandName),
+                _ => queryable.OrderBy(b => b.BrandName)
+            };
+
             var pagedList = await PagedList<Brand>.ToPagedListAsync(queryable, request);
 
             return new PaginationResponse<Brand>

@@ -8,5 +8,7 @@ namespace PatriSystem.Domain.Pagination
 {
     public class BrandPaginationRequest : PaginationRequest
     {
+        public string? SortBy { get; set; }
+        public bool SortDescending { get; set; } = false;
     }
 }

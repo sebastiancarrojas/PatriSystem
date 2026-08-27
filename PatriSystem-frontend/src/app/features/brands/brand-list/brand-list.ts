@@ -9,7 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSortModule, Sort, SortDirection } from '@angular/material/sort';
 import { PaginatorComponent } from '../../../shared/components/paginator/paginator';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 
@@ -24,7 +24,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
     MatIconModule,
     MatFormFieldModule,
     MatInputModule,
-    MatProgressSpinnerModule,
+    MatSortModule,
     PaginatorComponent,
   ],
   templateUrl: './brand-list.html',
@@ -43,6 +43,8 @@ export class BrandListComponent implements OnInit {
   currentPage = signal(1);
   totalPages = signal(1);
   displayedColumns: string[] = ['brandName', 'brandDescription', 'createdAt', 'actions'];
+  sortActive = '';
+  sortDirection: SortDirection = '';
 
   searchControl = new FormControl('');
 
@@ -64,8 +66,10 @@ export class BrandListComponent implements OnInit {
 
   loadBrands(): void {
     this.loading.set(true);
+    const sortBy = this.sortDirection ? this.sortActive : undefined;
+    const sortDescending = this.sortDirection === 'desc';
     this.brandService
-      .getPaginated(this.currentPage(), this.searchControl.value ?? undefined)
+      .getPaginated(this.currentPage(), this.searchControl.value ?? undefined, sortBy, sortDescending)
       .subscribe({
         next: (response) => {
           this.brands.set(response.items);
@@ -77,6 +81,13 @@ export class BrandListComponent implements OnInit {
           this.loading.set(false);
         },
       });
+  }
+
+  onSortChange(sort: Sort): void {
+    this.sortActive = sort.active;
+    this.sortDirection = sort.direction;
+    this.currentPage.set(1);
+    this.loadBrands();
   }
 
   onPageChange(page: number): void {

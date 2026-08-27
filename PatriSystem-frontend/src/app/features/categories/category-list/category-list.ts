@@ -12,6 +12,7 @@ import { MatInputModule } from '@angular/material/input';
 import { PaginatorComponent } from '../../../shared/components/paginator/paginator';
 import { FormControl } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { MatSortModule, Sort, SortDirection } from '@angular/material/sort';
 
 @Component({
   selector: 'app-category-list',
@@ -25,6 +26,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
     MatFormFieldModule,
     MatInputModule,
     PaginatorComponent,
+    MatSortModule,
   ],
   templateUrl: './category-list.html',
   changeDetection: ChangeDetectionStrategy.Eager,
@@ -42,6 +44,7 @@ export class CategoryListComponent implements OnInit {
   currentPage = signal(1);
   totalPages = signal(1);
   displayedColumns: string[] = ['categoryName', 'createdAt', 'actions'];
+  sortActive = ''; sortDirection: SortDirection = '';
 
   searchControl = new FormControl('');
 
@@ -62,8 +65,10 @@ export class CategoryListComponent implements OnInit {
 
   loadCategories(): void {
     this.loading.set(true);
+    const sortBy = this.sortDirection ? this.sortActive : undefined;
+    const sortDescending = this.sortDirection === 'desc';
     this.categoryService
-      .getPaginated(this.currentPage(), this.searchControl.value ?? undefined)
+      .getPaginated(this.currentPage(), this.searchControl.value ?? undefined, sortBy, sortDescending)
       .subscribe({
         next: (response) => {
           this.categories.set(response.items);
@@ -75,6 +80,13 @@ export class CategoryListComponent implements OnInit {
           this.loading.set(false);
         },
       });
+  }
+
+  onSortChange(sort: Sort): void {
+    this.sortActive = sort.active;
+    this.sortDirection = sort.direction;
+    this.currentPage.set(1);
+    this.loadCategories();
   }
 
   onPageChange(page: number): void {

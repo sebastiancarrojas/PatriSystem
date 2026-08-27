@@ -8,6 +8,7 @@ namespace PatriSystem.Domain.Pagination
 {
     public class CategoryPaginationRequest : PaginationRequest
     {
-
+        public string? SortBy { get; set; }
+        public bool SortDescending { get; set; } = false;
     }
 }

@@ -109,9 +109,6 @@ namespace PatriSystem.DataAccess.Repositories
 
             queryable = request.SortBy?.ToLower() switch
             {
-                "sku" => request.SortDescending
-                    ? queryable.OrderByDescending(p => p.Sku)
-                    : queryable.OrderBy(p => p.Sku),
                 "unitprice" => request.SortDescending
                     ? queryable.OrderByDescending(p => p.UnitPrice)
                     : queryable.OrderBy(p => p.UnitPrice),

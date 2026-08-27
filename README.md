@@ -103,13 +103,40 @@ Edit `PatriSystem.API/appsettings.json`:
 }
 ```
 
-3. **Apply migrations**
+3. **Configure the JWT secret**
+
+The JWT signing key (`JwtSettings:SecretKey`) is intentionally left empty in `appsettings.json` and must be provided separately — it should never be committed to source control.
+
+| Environment | Method |
+|-------------|--------|
+| Local development | [.NET User Secrets](https://learn.microsoft.com/en-us/aspnet/core/security/app-secrets) |
+| Production | Environment variable |
+
+```bash
+cd PatriSystem.API
+dotnet user-secrets init
+dotnet user-secrets set "JwtSettings:SecretKey" "<your-secret-key>"
+```
+
+For production, set the equivalent environment variable (`__` maps to the nested JSON key):
+
+```
+JwtSettings__SecretKey=<your-secret-key>
+```
+
+Generate a secure key with:
+
+```bash
+openssl rand -base64 64
+```
+
+4. **Apply migrations**
 ```bash
 cd PatriSystem.API
 dotnet ef database update
 ```
 
-4. **Run the API**
+5. **Run the API**
 ```bash
 dotnet run
 ```

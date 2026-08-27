@@ -93,7 +93,16 @@ namespace PatriSystem.DataAccess.Repositories
             if (request.EndDate.HasValue)
                 queryable = queryable.Where(s => s.SaleDate <= request.EndDate.Value);
 
-            queryable = queryable.OrderByDescending(s => s.SaleDate);
+            queryable = request.SortBy?.ToLower() switch
+            {
+                "totalamount" => request.SortDescending
+                    ? queryable.OrderByDescending(s => s.TotalAmount)
+                    : queryable.OrderBy(s => s.TotalAmount),
+                "saledate" => request.SortDescending
+                    ? queryable.OrderByDescending(s => s.SaleDate)
+                    : queryable.OrderBy(s => s.SaleDate),
+                _ => queryable.OrderByDescending(s => s.SaleDate)
+            };
 
             var pagedList = await PagedList<Sale>.ToPagedListAsync(queryable, request);
 

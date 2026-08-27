@@ -26,4 +26,6 @@ export interface SalePaginationRequest {
   filter?: string;
   startDate?: string;
   endDate?: string;
+  sortBy?: string;
+  sortDescending?: boolean;
 }

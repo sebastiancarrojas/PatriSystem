@@ -10,7 +10,7 @@ import { Sale } from '../../../core/models/sale.model';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSortModule, Sort, SortDirection } from '@angular/material/sort';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -27,7 +27,7 @@ import { PaginatorComponent } from '../../../shared/components/paginator/paginat
     MatTableModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    MatSortModule,
     MatFormFieldModule,
     MatInputModule,
     MatDatepickerModule,
@@ -53,6 +53,8 @@ export class SaleListComponent implements OnInit {
     'items',
     'actions',
   ];
+  sortActive = 'saleDate';
+  sortDirection: SortDirection = 'desc';
 
   searchControl = new FormControl('');
   startDateControl = new FormControl<Date | null>(null);
@@ -89,6 +91,8 @@ export class SaleListComponent implements OnInit {
 
   loadSales(): void {
     this.loading.set(true);
+    this.request.sortBy = this.sortDirection ? this.sortActive : undefined;
+    this.request.sortDescending = this.sortDirection === 'desc';
     this.saleService.getPaginated(this.request).subscribe({
       next: (response) => {
         this.sales.set(response.items);
@@ -103,6 +107,13 @@ export class SaleListComponent implements OnInit {
     });
   }
 
+  onSortChange(sort: Sort): void {
+    this.sortActive = sort.active;
+    this.sortDirection = sort.direction;
+    this.request.page = 1;
+    this.loadSales();
+  }
+
   onPageChange(page: number): void {
     this.request.page = page;
     this.loadSales();
@@ -112,6 +123,8 @@ export class SaleListComponent implements OnInit {
     this.searchControl.setValue('');
     this.startDateControl.setValue(null);
     this.endDateControl.setValue(null);
+    this.sortActive = 'saleDate';
+    this.sortDirection = 'desc';
     this.request = { page: 1, recordsPerPage: 10 };
     this.loadSales();
   }

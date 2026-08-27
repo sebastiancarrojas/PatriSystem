@@ -12,9 +12,9 @@ import { Category } from '../../../core/models/category.model';
 import { Brand } from '../../../core/models/brand.model';
 import { ProductPaginationRequest } from '../../../core/models/pagination.model';
 import { MatTableModule } from '@angular/material/table';
+import { MatSortModule, Sort, SortDirection } from '@angular/material/sort';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -30,9 +30,9 @@ import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialo
     RouterModule,
     ReactiveFormsModule,
     MatTableModule,
+    MatSortModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
@@ -50,6 +50,9 @@ export class ProductListComponent implements OnInit {
   private notification = inject(NotificationService);
   private dialog = inject(MatDialog);
 
+  sortActive = '';
+  sortDirection: SortDirection = '';
+
   products = signal<Product[]>([]);
   categories = signal<Category[]>([]);
   brands = signal<Brand[]>([]);
@@ -59,6 +62,7 @@ export class ProductListComponent implements OnInit {
   totalPages = signal(1);
   displayedColumns: string[] = [
     'productName',
+    'sku',
     'barcode',
     'categoryName',
     'brandName',
@@ -145,11 +149,22 @@ export class ProductListComponent implements OnInit {
     this.loadProducts();
   }
 
+  onSortChange(sort: Sort): void {
+    this.sortActive = sort.active;
+    this.sortDirection = sort.direction;
+    this.request.sortBy = sort.direction ? sort.active : undefined;
+    this.request.sortDescending = sort.direction === 'desc';
+    this.request.page = 1;
+    this.loadProducts();
+  }
+
   clearFilters(): void {
     this.searchControl.setValue('');
     this.categoryControl.setValue('');
     this.brandControl.setValue('');
     this.statusControl.setValue('');
+    this.sortActive = '';
+    this.sortDirection = '';
     this.request = { page: 1, recordsPerPage: 10 };
     this.loadProducts();
   }

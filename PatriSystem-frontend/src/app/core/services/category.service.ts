@@ -12,8 +12,8 @@ export class CategoryService {
     return this.api.get<Category[]>('Categories');
   }
 
-  getPaginated(page: number = 1, filter?: string): Observable<PaginationResponse<Category>> {
-    return this.api.get<PaginationResponse<Category>>('Categories/paginated', { page, recordsPerPage: 10, filter });
+  getPaginated(page: number = 1, filter?: string, sortBy?: string, sortDescending?: boolean): Observable<PaginationResponse<Category>> {
+    return this.api.get<PaginationResponse<Category>>('Categories/paginated', { page, recordsPerPage: 10, filter, sortBy, sortDescending });
   }
 
   create(category: CreateCategoryRequest): Observable<Category> {
